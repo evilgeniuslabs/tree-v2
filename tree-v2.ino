@@ -79,7 +79,10 @@ uint8_t brightness = brightnessMap[brightnessIndex];
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
-#define SECONDS_PER_PALETTE 10
+uint8_t secondsPerPalette = 10;
+
+uint8_t cooling = 49;
+uint8_t sparking = 60;
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -139,7 +142,7 @@ void setup() {
   FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(brightness);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
-  fill_solid(leds, NUM_LEDS, solidColor);
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
   FastLED.show();
 
   EEPROM.begin(512);
@@ -183,13 +186,13 @@ void setup() {
     hostnameChar[i] = hostname.charAt(i);
 
   MDNS.begin(hostnameChar);
-  
+
   // Add service to MDNS-SD
   MDNS.addService("http", "tcp", 80);
-  
+
   // Print hostname.
   Serial.println("Hostname: " + hostname);
-  
+
   if (apMode)
   {
     WiFi.mode(WIFI_AP);
@@ -256,6 +259,26 @@ void setup() {
     String value = webServer.arg("value");
     setPower(value.toInt());
     sendPower();
+  });
+
+  webServer.on("/cooling", HTTP_GET, []() {
+    sendCooling();
+  });
+
+  webServer.on("/cooling", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    cooling = value.toInt();
+    sendCooling();
+  });
+
+  webServer.on("/sparking", HTTP_GET, []() {
+    sendCooling();
+  });
+
+  webServer.on("/sparking", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    sparking = value.toInt();
+    sendSparking();
   });
 
   webServer.on("/solidColor", HTTP_GET, []() {
@@ -361,7 +384,9 @@ typedef PatternAndName PatternAndNameList[];
 PatternAndNameList patterns = {
   { pride,                  "Pride" },
   { pride2,                 "Pride 2" },
+
   { colorWaves,             "Color Waves" },
+  { colorWaves2,             "Color Waves 2" },
 
   { northwardRainbow,       "Northward Rainbow" },
   { northeastwardRainbow,   "Northeastward Rainbow" },
@@ -424,9 +449,12 @@ void loop(void) {
   // }
 
   // change to a new cpt-city gradient palette
-  EVERY_N_SECONDS( SECONDS_PER_PALETTE ) {
+  EVERY_N_SECONDS( secondsPerPalette ) {
     gCurrentPaletteNumber = addmod8( gCurrentPaletteNumber, 1, gGradientPaletteCount);
     gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
+
+    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
+    targetPalette = palettes[paletteIndex];
   }
 
   EVERY_N_MILLISECONDS(40) {
@@ -734,6 +762,9 @@ String getAllJson()
   json += "\"power\":" + String(power) + ",";
   json += "\"brightness\":" + String(brightness) + ",";
 
+  json += "\"cooling\":" + String(cooling) + ",";
+  json += "\"sparking\":" + String(sparking) + ",";
+
   json += "\"currentPattern\":{";
   json += "\"index\":" + String(currentPatternIndex);
   json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"}";
@@ -768,6 +799,32 @@ void sendPower()
 void broadcastPower()
 {
   String json = "{\"power\":" + String(power) + "}";
+  webSocketsServer.broadcastTXT(json);
+}
+
+void sendCooling()
+{
+  String json = String(cooling);
+  webServer.send(200, "text/json", json);
+  json = String();
+}
+
+void broadcastCooling()
+{
+  String json = "{\"cooling\":" + String(cooling) + "}";
+  webSocketsServer.broadcastTXT(json);
+}
+
+void sendSparking()
+{
+  String json = String(sparking);
+  webServer.send(200, "text/json", json);
+  json = String();
+}
+
+void broadcastSparking()
+{
+  String json = "{\"sparking\":" + String(sparking) + "}";
   webSocketsServer.broadcastTXT(json);
 }
 
@@ -1042,7 +1099,7 @@ void risingRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(zCoords[i] * 18 - beat8(30), 255, 255);
+    leds[i] = CHSV(zCoords[i] - beat8(30), 255, 255);
   }
 }
 
@@ -1050,7 +1107,7 @@ void fallingRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(zCoords[i] * 18 + beat8(30), 255, 255);
+    leds[i] = CHSV(zCoords[i] + beat8(30), 255, 255);
   }
 }
 
@@ -1060,7 +1117,7 @@ void inwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(currentPalette, radii[i] * 32 + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] * 32 + beat8(30));
   }
 }
 
@@ -1068,7 +1125,7 @@ void outwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(currentPalette, radii[i] * 32 - beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] * 32 - beat8(30));
   }
 }
 
@@ -1076,7 +1133,7 @@ void rotatingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(currentPalette, angles[i] + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, angles[i] + beat8(30));
   }
 }
 
@@ -1084,7 +1141,7 @@ void risingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(currentPalette, zCoords[i] * 18 - beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 - beat8(30));
   }
 }
 
@@ -1092,7 +1149,7 @@ void fallingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(currentPalette, zCoords[i] * 18 + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 + beat8(30));
   }
 }
 
@@ -1138,7 +1195,7 @@ void bpm()
   uint8_t BeatsPerMinute = 62;
   uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
   for ( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = ColorFromPalette(currentPalette, gHue + (i * 2), beat - gHue + (i * 10));
+    leds[i] = ColorFromPalette(gCurrentPalette, gHue + (i * 2), beat - gHue + (i * 10));
   }
 }
 
@@ -1255,7 +1312,7 @@ void pride2()
   sHue16 += deltams * beatsin88( 400, 5, 9);
   uint16_t brightnesstheta16 = sPseudotime;
 
-  for ( uint16_t i = 0 ; i < 14; i++) {
+  for ( uint16_t i = 0; i < levelCount; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
 
@@ -1270,9 +1327,8 @@ void pride2()
 
     for (uint8_t j = 0; j < NUM_LEDS; j++)
     {
-      if (zCoords[j] == i)
-      {
-        nblend( leds[j], newcolor, 64);
+      if (levels[j] == i) {
+        nblend(leds[j], newcolor, 64);
       }
     }
   }
@@ -1281,8 +1337,8 @@ void pride2()
 void radialPaletteShift()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++) {
-    // leds[i] = ColorFromPalette( currentPalette, gHue + sin8(i*16), brightness);
-    leds[i] = ColorFromPalette(currentPalette, i + gHue, 255, LINEARBLEND);
+    // leds[i] = ColorFromPalette( gCurrentPalette, gHue + sin8(i*16), brightness);
+    leds[i] = ColorFromPalette(gCurrentPalette, i + gHue, 255, LINEARBLEND);
   }
 }
 
@@ -1294,21 +1350,18 @@ void heatMap(CRGBPalette16 palette, bool up)
   // Add entropy to random number generator; we use a lot of it.
   random16_add_entropy(random(256));
 
-  uint8_t cooling = 55;
-  uint8_t sparking = 120;
-
   // Array of temperature readings at each simulation cell
-  static byte heat[NUM_LEDS];
+  static byte heat[256];
 
   byte colorindex;
 
   // Step 1.  Cool down every cell a little
-  for ( int i = 0; i < NUM_LEDS; i++) {
+  for ( uint16_t i = 0; i < NUM_LEDS; i++) {
     heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / NUM_LEDS) + 2));
   }
 
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( int k = NUM_LEDS - 1; k >= 2; k--) {
+  for ( uint16_t k = NUM_LEDS - 1; k >= 2; k--) {
     heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
   }
 
@@ -1319,7 +1372,7 @@ void heatMap(CRGBPalette16 palette, bool up)
   }
 
   // Step 4.  Map from heat cells to LED colors
-  for ( int j = 0; j < NUM_LEDS; j++) {
+  for ( uint16_t j = 0; j < NUM_LEDS; j++) {
     // Scale the heat value from 0-255 down to 0-240
     // for best results with color palettes.
     colorindex = scale8(heat[j], 240);
@@ -1363,15 +1416,6 @@ uint8_t beatsaw8( accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest 
 
 void colorWaves()
 {
-  EVERY_N_SECONDS( SECONDS_PER_PALETTE ) {
-    gCurrentPaletteNumber = addmod8( gCurrentPaletteNumber, 1, gGradientPaletteCount);
-    gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
-  }
-
-  EVERY_N_MILLISECONDS(40) {
-    nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 16);
-  }
-
   colorwaves( leds, NUM_LEDS, gCurrentPalette);
 }
 
@@ -1426,6 +1470,60 @@ void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
     pixelnumber = (numleds - 1) - pixelnumber;
 
     nblend( ledarray[pixelnumber], newcolor, 128);
+  }
+}
+
+void colorWaves2()
+{
+  static uint16_t sPseudotime = 0;
+  static uint16_t sLastMillis = 0;
+  static uint16_t sHue16 = 0;
+
+  // uint8_t sat8 = beatsin88( 87, 220, 250);
+  uint8_t brightdepth = beatsin88( 341, 96, 224);
+  uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
+  uint8_t msmultiplier = beatsin88(147, 23, 60);
+
+  uint16_t hue16 = sHue16;//gHue * 256;
+  uint16_t hueinc16 = beatsin88(113, 300, 1500);
+
+  uint16_t ms = millis();
+  uint16_t deltams = ms - sLastMillis ;
+  sLastMillis  = ms;
+  sPseudotime += deltams * msmultiplier;
+  sHue16 += deltams * beatsin88( 400, 5, 9);
+  uint16_t brightnesstheta16 = sPseudotime;
+
+  for ( uint16_t levelIndex = 0 ; levelIndex < levelCount; levelIndex++) {
+    hue16 += hueinc16;
+    uint8_t hue8 = hue16 / 256;
+    uint16_t h16_128 = hue16 >> 7;
+    if ( h16_128 & 0x100) {
+      hue8 = 255 - (h16_128 >> 1);
+    } else {
+      hue8 = h16_128 >> 1;
+    }
+
+    brightnesstheta16  += brightnessthetainc16;
+    uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+
+    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
+    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    bri8 += (255 - brightdepth);
+
+    uint8_t index = hue8;
+    //index = triwave8( index);
+    index = scale8( index, 240);
+
+    CRGB newcolor = ColorFromPalette( gCurrentPalette, index, bri8);
+
+    for (uint8_t i = 0; i < NUM_LEDS; i++) {
+      if (levels[i] == levelIndex) {
+        uint8_t pixelnumber = (NUM_LEDS - 1) - i;
+
+        nblend( leds[pixelnumber], newcolor, 128);
+      }
+    }
   }
 }
 

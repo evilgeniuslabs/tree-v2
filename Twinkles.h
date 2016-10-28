@@ -71,7 +71,7 @@ void brightenOrDarkenEachPixel( fract8 fadeUpAmount, fract8 fadeDownAmount)
 
 void colortwinkles()
 {
-  EVERY_N_MILLIS(17)
+  EVERY_N_MILLIS(30)
   {
     // Make each pixel brighter or darker, depending on
     // its 'direction' flag.

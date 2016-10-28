@@ -35,6 +35,9 @@ var urlBase = ""; // used when hosting the site on the ESP8266
 var brightnessTimer = {};
 var colorTimer = {};
 
+var coolingTimer = {};
+var sparkingTimer = {};
+
 var ignoreColorChange = true;
 
 var allData;
@@ -51,6 +54,12 @@ ws.onmessage = function(evt) {
         updatePowerButtons(data.power);
       if(data.brightness != null) {
         updateBrightnessControls(data.brightness);
+      }
+      if(data.cooling != null) {
+        updateCoolingControls(data.cooling);
+      }
+      if(data.sparking != null) {
+        updateSparkingControls(data.sparking);
       }
       if(data.solidColor != null && data.solidColor.r != null && data.solidColor.g != null && data.solidColor.b != null)
       {
@@ -101,6 +110,24 @@ $("#inputBrightness").on("change", function() {
    delaySetBrightness();
 });
 
+$("#inputCooling").on("change mousemove", function() {
+   $("#spanCooling").html($(this).val());
+});
+
+$("#inputCooling").on("change", function() {
+   $("#spanCooling").html($(this).val());
+   delaySetCooling();
+});
+
+$("#inputSparking").on("change mousemove", function() {
+   $("#spanSparking").html($(this).val());
+});
+
+$("#inputSparking").on("change", function() {
+   $("#spanSparking").html($(this).val());
+   delaySetSparking();
+});
+
 $("#inputPattern").change(function() {
    setPattern($("#inputPattern option:selected").index());
 });
@@ -131,6 +158,8 @@ function getAll() {
 
     $("#status").html("Connecting...");
     updateBrightnessControls(data.brightness);
+    updateCoolingControls(data.cooling);
+    updateSparkingControls(data.sparking);
 
     var hexString = rgbToHex(data.solidColor.r, data.solidColor.g, data.solidColor.b);
     ignoreColorChange = true;
@@ -157,6 +186,16 @@ function updateBrightnessControls(value) {
   $("#spanBrightness").html(value);
 }
 
+function updateCoolingControls(value) {
+  $("#inputCooling").val(value);
+  $("#spanCooling").html(value);
+}
+
+function updateSparkingControls(value) {
+  $("#inputSparking").val(value);
+  $("#spanSparking").html(value);
+}
+
 function updatePowerButtons(value) {
   if(value == 0) {
     $("#btnPowerOn").attr("class", "btn btn-default");
@@ -181,9 +220,35 @@ function delaySetBrightness() {
     }, 300);
 }
 
+function delaySetCooling() {
+    clearTimeout(coolingTimer);
+    coolingTimer = setTimeout(function() {
+      setCooling($("#inputCooling").val());
+    }, 300);
+}
+
+function delaySetSparking() {
+    clearTimeout(sparkingTimer);
+    sparkingTimer = setTimeout(function() {
+      setSparking($("#inputSparking").val());
+    }, 300);
+}
+
 function setBrightness(value) {
   $.post(urlBase + "brightness?value=" + value, function(data) {
     $("#status").html("Set Brightness: " + data);
+  });
+}
+
+function setCooling(value) {
+  $.post(urlBase + "cooling?value=" + value, function(data) {
+    $("#status").html("Set Cooling: " + data);
+  });
+}
+
+function setSparking(value) {
+  $.post(urlBase + "sparking?value=" + value, function(data) {
+    $("#status").html("Set Sparking: " + data);
   });
 }
 
