@@ -81,7 +81,14 @@ uint8_t brightness = brightnessMap[brightnessIndex];
 // 20-120 is better for deployment
 uint8_t secondsPerPalette = 10;
 
+// COOLING: How much does the air cool as it rises?
+// Less cooling = taller flames.  More cooling = shorter flames.
+// Default 50, suggested range 20-100 
 uint8_t cooling = 49;
+
+// SPARKING: What chance (out of 255) is there that a new spark will be lit?
+// Higher chance = more roaring fire.  Lower chance = more flickery fire.
+// Default 120, suggested range 50-200.
 uint8_t sparking = 60;
 
 ///////////////////////////////////////////////////////////////////////
@@ -1075,7 +1082,7 @@ void inwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(radii[i] * 32 + beat8(30), 255, 255);
+    leds[i] = CHSV(conicalRadii[i] * 32 + beat8(15), 255, 255);
   }
 }
 
@@ -1083,7 +1090,7 @@ void outwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(radii[i] * 32 - beat8(30), 255, 255);
+    leds[i] = CHSV(conicalRadii[i] * 32 - beat8(15), 255, 255);
   }
 }
 
@@ -1117,7 +1124,7 @@ void inwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] * 32 + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, conicalRadii[i] * 32 + beat8(15));
   }
 }
 
@@ -1125,7 +1132,7 @@ void outwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] * 32 - beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, conicalRadii[i] * 32 - beat8(15));
   }
 }
 
