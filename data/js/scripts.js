@@ -32,11 +32,7 @@ if(jQuery)(function($){$.minicolors={defaults:{animationSpeed:50,animationEasing
 // var urlBase = "http://192.168.1.24/"; // used when hosting the site somewhere other than the ESP8266 (handy for testing without waiting forever to upload to SPIFFS)
 var urlBase = ""; // used when hosting the site on the ESP8266
 
-var brightnessTimer = {};
-var colorTimer = {};
-
-var coolingTimer = {};
-var sparkingTimer = {};
+var postValueTimer = {};
 
 var ignoreColorChange = true;
 
@@ -50,10 +46,17 @@ ws.onmessage = function(evt) {
   {
     var data = JSON.parse(evt.data);
     if(data != null) {
-      if(data.power != null)
+      if(data.power != null) {
         updatePowerButtons(data.power);
+	  }
+	  if(data.autoplay != null) {
+        updateAutoplayButtons(data.autoplay);
+	  }
       if(data.brightness != null) {
         updateBrightnessControls(data.brightness);
+      }
+      if(data.autoplayDuration != null) {
+        updateAutoplayDurationControls(data.autoplayDuration);
       }
       if(data.cooling != null) {
         updateCoolingControls(data.cooling);
@@ -94,11 +97,23 @@ $("#btnRefresh").click(function() {
 });
 
 $("#btnPowerOn").click(function() {
-  setPower(1);
+  postValue("power", 1);
+  updatePowerButtons(1);
 });
 
 $("#btnPowerOff").click(function() {
-  setPower(0);
+  postValue("power", 0);
+  updatePowerButtons(0);
+});
+
+$("#btnAutoplayOn").click(function() {
+  postValue("autoplay", 1);
+  updateAutoplayButtons(0);
+});
+
+$("#btnAutoplayOff").click(function() {
+  postValue("autoplay", 0);
+  updateAutoplayButtons(0);
 });
 
 $("#inputBrightness").on("change mousemove", function() {
@@ -106,8 +121,19 @@ $("#inputBrightness").on("change mousemove", function() {
 });
 
 $("#inputBrightness").on("change", function() {
-   $("#spanBrightness").html($(this).val());
-   delaySetBrightness();
+  var brightness = $(this).val();
+  $("#spanBrightness").html(brightness);
+  delayPostValue("brightness", brightness);
+});
+
+$("#inputAutoplayDuration").on("change mousemove", function() {
+   $("#spanAutoplayDuration").html($(this).val());
+});
+
+$("#inputAutoplayDuration").on("change", function() {
+  var autoplayDuration = $(this).val();
+  $("#spanAutoplayDuration").html(autoplayDuration);
+  delayPostValue("autoplayDuration", autoplayDuration);
 });
 
 $("#inputCooling").on("change mousemove", function() {
@@ -115,8 +141,9 @@ $("#inputCooling").on("change mousemove", function() {
 });
 
 $("#inputCooling").on("change", function() {
-   $("#spanCooling").html($(this).val());
-   delaySetCooling();
+  var cooling = $(this).val();
+  $("#spanCooling").html(cooling);
+  delayPostValue("cooling", cooling);
 });
 
 $("#inputSparking").on("change mousemove", function() {
@@ -124,12 +151,14 @@ $("#inputSparking").on("change mousemove", function() {
 });
 
 $("#inputSparking").on("change", function() {
-   $("#spanSparking").html($(this).val());
-   delaySetSparking();
+  var sparking = $(this).val();
+   $("#spanSparking").html(sparking);
+   delayPostValue("sparking", sparking);
 });
 
 $("#inputPattern").change(function() {
-   setPattern($("#inputPattern option:selected").index());
+  var pattern = $("#inputPattern option:selected").index();
+  postValue("pattern", pattern);
 });
 
 $("#inputColor").change(function() {
@@ -144,7 +173,7 @@ $(".btn-color").click(function() {
 
   var rgb = $(this).css('backgroundColor');
   var components = rgbToComponents(rgb);
-  delaySetColor(components);
+  setColor(components);
 
   var hexString = rgbToHex(components.r, components.g, components.b);
   ignoreColorChange = true;
@@ -153,11 +182,14 @@ $(".btn-color").click(function() {
 });
 
 function getAll() {
+  $("#status").html("Loading, please wait...");
+  
   $.get(urlBase + "all", function(data) {
     allData = data;
 
     $("#status").html("Connecting...");
     updateBrightnessControls(data.brightness);
+    updateAutoplayDurationControls(data.autoplayDuration);
     updateCoolingControls(data.cooling);
     updateSparkingControls(data.sparking);
 
@@ -167,6 +199,7 @@ function getAll() {
     ignoreColorChange = false;
 
     updatePowerButtons(data.power);
+    updateAutoplayButtons(data.autoplay);
 
     $("#inputPattern").find("option").remove();
 
@@ -184,6 +217,11 @@ function getAll() {
 function updateBrightnessControls(value) {
   $("#inputBrightness").val(value);
   $("#spanBrightness").html(value);
+}
+
+function updateAutoplayDurationControls(value) {
+  $("#inputAutoplayDuration").val(value);
+  $("#spanAutoplayDuration").html(value);
 }
 
 function updateCoolingControls(value) {
@@ -206,61 +244,37 @@ function updatePowerButtons(value) {
   }
 }
 
-function setPower(value) {
-  $.post(urlBase + "power?value=" + value, function(data) {
-    updatePowerButtons(data);
-    $("#status").html("Set Power: " + data);
-  });
+function updateAutoplayButtons(value) {
+  if(value == 0) {
+    $("#btnAutoplayOn").attr("class", "btn btn-default");
+    $("#btnAutoplayOff").attr("class", "btn btn-primary");
+  } else {
+    $("#btnAutoplayOn").attr("class", "btn btn-primary");
+    $("#btnAutoplayOff").attr("class", "btn btn-default");
+  }
 }
 
-function delaySetBrightness() {
-    clearTimeout(brightnessTimer);
-    brightnessTimer = setTimeout(function() {
-      setBrightness($("#inputBrightness").val());
+function delayPostValue(name, value) {
+    clearTimeout(postValueTimer);
+    postValueTimer = setTimeout(function() {
+      postValue(name, value);
     }, 300);
 }
 
-function delaySetCooling() {
-    clearTimeout(coolingTimer);
-    coolingTimer = setTimeout(function() {
-      setCooling($("#inputCooling").val());
-    }, 300);
-}
-
-function delaySetSparking() {
-    clearTimeout(sparkingTimer);
-    sparkingTimer = setTimeout(function() {
-      setSparking($("#inputSparking").val());
-    }, 300);
-}
-
-function setBrightness(value) {
-  $.post(urlBase + "brightness?value=" + value, function(data) {
-    $("#status").html("Set Brightness: " + data);
-  });
-}
-
-function setCooling(value) {
-  $.post(urlBase + "cooling?value=" + value, function(data) {
-    $("#status").html("Set Cooling: " + data);
-  });
-}
-
-function setSparking(value) {
-  $.post(urlBase + "sparking?value=" + value, function(data) {
-    $("#status").html("Set Sparking: " + data);
-  });
-}
-
-function setPattern(value) {
-  $.post(urlBase + "pattern?value=" + value, function(data) {
-    $("#status").html("Set Pattern: " + data.name);
+function postValue(name, value) {
+  $.post(urlBase + name + "?value=" + value, function(data) {
+    if(data.name != null) {
+      $("#status").html("Set " + name + ": " + data.name);
+    }
+    else {
+      $("#status").html("Set " + name + ": " + data);
+    }
   });
 }
 
 function delaySetColor(value) {
-  clearTimeout(colorTimer);
-  colorTimer = setTimeout(function() {
+  clearTimeout(postValueTimer);
+  postValueTimer = setTimeout(function() {
     setColor(value);
   }, 300);
 }

@@ -5,19 +5,32 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fermat (Lux Phyllotaxis) by Evil Genius Labs</title>
+  <title>Tree v2 by Evil Genius Labs</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="images/atom196.png">
 </head>
 
 <body>
-  <header class="navbar navbar-default navbar-static-top" id="top" role="banner">
+  <nav class="navbar navbar-default navbar-static-top" id="top" role="banner">
     <div class="container">
       <div class="navbar-header">
-        <a class="navbar-brand" href="/">Fermat (Lux Phyllotaxis) by Evil Genius Labs</a>
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://www.evilgeniuslabs.org" target="_blank">Evil Genius Labs</a>
       </div>
-    </div>
-  </header>
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/">Tree v2 <span class="sr-only">(current)</span></a></li>
+          <li><a href="/edit.htm" target="_blank">Edit</a></li>
+          <li><a href="/update" target="_blank">Update</a></li>
+        </ul>
+      </div>
+	</div>
+  </nav>
   <div class="container">
     <form class="form-horizontal">
       <div class="form-group">
@@ -27,7 +40,7 @@
           </button>
         </div>
         <div class="col-sm-4">
-          <p id="status" class="form-control-static">Status</p>
+          <p id="status" class="form-control-static">Loading, please wait...</p>
         </div>
       </div>
       <div class="form-group">
@@ -52,10 +65,26 @@
         <label for="inputPattern" class="col-sm-2 control-label">Pattern</label>
         <div class="col-sm-6">
           <select class="form-control" id="inputPattern">
-            <option>Rainbow</option>
-            <option>Sinelon</option>
-            <option>Juggle</option>
+            <option></option>
           </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Autoplay</label>
+        <div class="col-sm-6">
+          <div class="btn-group" role="group" aria-label="Power">
+            <button type="button" class="btn btn-default" id="btnAutoplayOn">On</button>
+            <button type="button" class="btn btn-default" id="btnAutoplayOff">Off</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="inputAutoplayDuration" class="col-sm-2 control-label">Autoplay Duration (seconds)</label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <span class="input-group-addon" id="spanAutoplayDuration">10</span>
+            <input class="form-control" id="inputAutoplayDuration" type="range" step="1" min="1" max="255" />
+          </div>
         </div>
       </div>
       <div class="form-group">
@@ -111,7 +140,7 @@
         <div class="col-sm-6">
           <div class="input-group">
             <span class="input-group-addon" id="spanCooling">49</span>
-            <input class="form-control" id="inputCooling" type="range" step="1" min="20" max="100" />
+            <input class="form-control" id="inputCooling" type="range" step="1" min="0" max="255" />
           </div>
         </div>
       </div>
@@ -120,7 +149,7 @@
         <div class="col-sm-6">
           <div class="input-group">
             <span class="input-group-addon" id="spanSparking">60</span>
-            <input class="form-control" id="inputSparking" type="range" step="1" min="50" max="200" />
+            <input class="form-control" id="inputSparking" type="range" step="1" min="0" max="255" />
           </div>
         </div>
       </div>

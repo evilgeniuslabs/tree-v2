@@ -72,7 +72,7 @@ uint8_t patternIndex = 0;
 
 const uint8_t brightnessCount = 5;
 uint8_t brightnessMap[brightnessCount] = { 16, 32, 64, 128, 255 };
-int brightnessIndex = 0;
+uint8_t brightnessIndex = 0;
 uint8_t brightness = brightnessMap[brightnessIndex];
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
@@ -83,7 +83,7 @@ uint8_t secondsPerPalette = 10;
 
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
-// Default 50, suggested range 20-100 
+// Default 50, suggested range 20-100
 uint8_t cooling = 49;
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
@@ -105,11 +105,11 @@ CRGBPalette16 gTargetPalette( gGradientPalettes[0] );
 
 CRGBPalette16 IceColors_p = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
 
-int currentPatternIndex = 0; // Index number of which pattern is current
-bool autoplayEnabled = false;
+uint8_t currentPatternIndex = 0; // Index number of which pattern is current
+uint8_t autoplay = 0;
 
-uint8_t autoPlayDurationSeconds = 10;
-unsigned int autoPlayTimeout = 0;
+uint8_t autoplayDuration = 10;
+unsigned long autoPlayTimeout = 0;
 
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
@@ -189,7 +189,7 @@ void setup() {
   char hostnameChar[hostname.length() + 1];
   memset(hostnameChar, 0, hostname.length() + 1);
 
-  for (int i = 0; i < hostname.length(); i++)
+  for (uint8_t i = 0; i < hostname.length(); i++)
     hostnameChar[i] = hostname.charAt(i);
 
   MDNS.begin(hostnameChar);
@@ -259,33 +259,33 @@ void setup() {
   });
 
   webServer.on("/power", HTTP_GET, []() {
-    sendPower();
+    sendVariable(power);
   });
 
   webServer.on("/power", HTTP_POST, []() {
     String value = webServer.arg("value");
     setPower(value.toInt());
-    sendPower();
+    sendVariable(power);
   });
 
   webServer.on("/cooling", HTTP_GET, []() {
-    sendCooling();
+    sendVariable(cooling);
   });
 
   webServer.on("/cooling", HTTP_POST, []() {
     String value = webServer.arg("value");
     cooling = value.toInt();
-    sendCooling();
+    sendVariable(cooling);
   });
 
   webServer.on("/sparking", HTTP_GET, []() {
-    sendCooling();
+    sendVariable(sparking);
   });
 
   webServer.on("/sparking", HTTP_POST, []() {
     String value = webServer.arg("value");
     sparking = value.toInt();
-    sendSparking();
+    sendVariable(sparking);
   });
 
   webServer.on("/solidColor", HTTP_GET, []() {
@@ -321,23 +321,43 @@ void setup() {
   });
 
   webServer.on("/brightness", HTTP_GET, []() {
-    sendBrightness();
+    sendVariable(brightness);
   });
 
   webServer.on("/brightness", HTTP_POST, []() {
     String value = webServer.arg("value");
     setBrightness(value.toInt());
-    sendBrightness();
+    sendVariable(brightness);
   });
 
   webServer.on("/brightnessUp", HTTP_POST, []() {
     adjustBrightness(true);
-    sendBrightness();
+    sendVariable(brightness);
   });
 
   webServer.on("/brightnessDown", HTTP_POST, []() {
     adjustBrightness(false);
-    sendBrightness();
+    sendVariable(brightness);
+  });
+
+  webServer.on("/autoplay", HTTP_GET, []() {
+    sendVariable(autoplay);
+  });
+
+  webServer.on("/autoplay", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    setAutoplay(value.toInt());
+    sendVariable(autoplay);
+  });
+
+  webServer.on("/autoplayDuration", HTTP_GET, []() {
+    sendVariable(autoplayDuration);
+  });
+
+  webServer.on("/autoplayDuration", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    setAutoplayDuration(value.toInt());
+    sendVariable(autoplayDuration);
   });
 
   //list directory
@@ -365,7 +385,7 @@ void setup() {
   webSocketsServer.onEvent(webSocketEvent);
   Serial.println("Web socket server started");
 
-  autoPlayTimeout = millis() + (autoPlayDurationSeconds * 1000);
+  autoPlayTimeout = millis() + (autoplayDuration * 1000);
 }
 
 // scale the brightness of all pixels down
@@ -471,9 +491,9 @@ void loop(void) {
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
 
-  if (autoplayEnabled && millis() > autoPlayTimeout) {
+  if (autoplay && (millis() > autoPlayTimeout)) {
     adjustPattern(true);
-    autoPlayTimeout = millis() + (autoPlayDurationSeconds * 1000);
+    autoPlayTimeout = millis() + (autoplayDuration * 1000);
   }
 
   // Call the current pattern function once, updating the 'leds' array
@@ -550,7 +570,7 @@ void handleIrInput()
         break;
       }
     case InputCommand::PlayMode: { // toggle pause/play
-        autoplayEnabled = !autoplayEnabled;
+        setAutoplay(!autoplay);
         break;
       }
 
@@ -747,6 +767,11 @@ void loadSettings()
   {
     solidColor = CRGB(r, g, b);
   }
+
+  power = EEPROM.read(5);
+
+  autoplay = EEPROM.read(6);
+  autoplayDuration = EEPROM.read(7);
 }
 
 void sendAll()
@@ -768,6 +793,9 @@ String getAllJson()
 
   json += "\"power\":" + String(power) + ",";
   json += "\"brightness\":" + String(brightness) + ",";
+
+  json += "\"autoplay\":" + String(autoplay) + ",";
+  json += "\"autoplayDuration\":" + String(autoplayDuration) + ",";
 
   json += "\"cooling\":" + String(cooling) + ",";
   json += "\"sparking\":" + String(sparking) + ",";
@@ -796,45 +824,6 @@ String getAllJson()
   return json;
 }
 
-void sendPower()
-{
-  String json = String(power);
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastPower()
-{
-  String json = "{\"power\":" + String(power) + "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
-void sendCooling()
-{
-  String json = String(cooling);
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastCooling()
-{
-  String json = "{\"cooling\":" + String(cooling) + "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
-void sendSparking()
-{
-  String json = String(sparking);
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastSparking()
-{
-  String json = "{\"sparking\":" + String(sparking) + "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
 void sendPattern()
 {
   String json = "{";
@@ -851,19 +840,6 @@ void broadcastPattern()
   json += "\"index\":" + String(currentPatternIndex);
   json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"";
   json += "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
-void sendBrightness()
-{
-  String json = String(brightness);
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastBrightness()
-{
-  String json = "{\"brightness\":" + String(brightness) + "}";
   webSocketsServer.broadcastTXT(json);
 }
 
@@ -890,10 +866,58 @@ void broadcastSolidColor()
   webSocketsServer.broadcastTXT(json);
 }
 
+void sendVariable(uint8_t value)
+{
+  sendVariable(String(value));
+}
+
+void sendVariable(String value)
+{
+  webServer.send(200, "text/json", value);
+}
+
+void broadcastInt(String name, uint8_t value)
+{
+  String s = String(value);
+  broadcastString(name, s);
+}
+
+void broadcastString(String name, String value)
+{
+  String json = "{\"" + name + "\":" + value + "}";
+  webSocketsServer.broadcastTXT(json);
+}
+
 void setPower(uint8_t value)
 {
   power = value == 0 ? 0 : 1;
-  broadcastPower();
+
+  EEPROM.write(5, power);
+  EEPROM.commit();
+
+  broadcastInt("power", power);
+}
+
+void setAutoplay(uint8_t value)
+{
+  autoplay = value == 0 ? 0 : 1;
+
+  EEPROM.write(6, autoplay);
+  EEPROM.commit();
+
+  broadcastInt("autoplay", autoplay);
+}
+
+void setAutoplayDuration(uint8_t value)
+{
+  autoplayDuration = value;
+
+  EEPROM.write(7, autoplayDuration);
+  EEPROM.commit();
+  
+  autoPlayTimeout = millis() + (autoplayDuration * 1000);
+
+  broadcastInt("autoplayDuration", autoplayDuration);
 }
 
 void setSolidColor(CRGB color)
@@ -906,8 +930,9 @@ void setSolidColor(uint8_t r, uint8_t g, uint8_t b)
   solidColor = CRGB(r, g, b);
 
   EEPROM.write(2, r);
-  EEPROM.write(3, r);
-  EEPROM.write(4, r);
+  EEPROM.write(3, g);
+  EEPROM.write(4, b);
+  EEPROM.commit();
 
   setPattern(patternCount - 1);
 
@@ -934,12 +959,9 @@ void adjustPattern(bool up)
   broadcastPattern();
 }
 
-void setPattern(int value)
+void setPattern(uint8_t value)
 {
-  // don't wrap around at the ends
-  if (value < 0)
-    value = 0;
-  else if (value >= patternCount)
+  if (value >= patternCount)
     value = patternCount - 1;
 
   currentPatternIndex = value;
@@ -950,19 +972,12 @@ void setPattern(int value)
   broadcastPattern();
 }
 
-// adjust the brightness, and wrap around at the ends
 void adjustBrightness(bool up)
 {
-  if (up)
+  if (up && brightnessIndex < brightnessCount - 1)
     brightnessIndex++;
-  else
+  else if (!up && brightnessIndex > 0)
     brightnessIndex--;
-
-  // wrap around at the ends
-  if (brightnessIndex < 0)
-    brightnessIndex = brightnessCount - 1;
-  else if (brightnessIndex >= brightnessCount)
-    brightnessIndex = 0;
 
   brightness = brightnessMap[brightnessIndex];
 
@@ -971,12 +986,11 @@ void adjustBrightness(bool up)
   EEPROM.write(0, brightness);
   EEPROM.commit();
 
-  broadcastBrightness();
+  broadcastInt("brightness", brightness);
 }
 
-void setBrightness(int value)
+void setBrightness(uint8_t value)
 {
-  // don't wrap around at the ends
   if (value > 255)
     value = 255;
   else if (value < 0) value = 0;
@@ -988,7 +1002,7 @@ void setBrightness(int value)
   EEPROM.write(0, brightness);
   EEPROM.commit();
 
-  broadcastBrightness();
+  broadcastInt("brightness", brightness);
 }
 
 void strandTest()
