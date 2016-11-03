@@ -3,9 +3,9 @@ Tree - v2
 
 White xmas tree with 250 8mm WS2811 RGB LEDs, driven with an ESP8266, and controlled via a web app over Wi-Fi and/or IR remote control.
 
-[Demo Videos](https://youtu.be/eBLh7yvzN-Y?list=PLUYGVM-2vDxJLjAv6qwl_FOBu8xzAoJL4):
+[Demo Videos](https://youtu.be/fpioieRDVrk?list=PLUYGVM-2vDxJKi8lgQGImMW3xGfPCup2E):
 
-[![Demo Videos](http://img.youtube.com/vi/eBLh7yvzN-Y/0.jpg)](https://youtu.be/eBLh7yvzN-Y?list=PLUYGVM-2vDxJLjAv6qwl_FOBu8xzAoJL4)
+[![Demo Videos](http://img.youtube.com/vi/fpioieRDVrk/0.jpg)](https://youtu.be/fpioieRDVrk?list=PLUYGVM-2vDxJKi8lgQGImMW3xGfPCup2E)
 
 More details: https://www.evilgeniuslabs.org/tree-v2.html
 
@@ -52,7 +52,7 @@ Download and install the following libraries, using the instructions here: https
 * [WebSocket Server and Client for Arduino](https://github.com/Links2004/arduinoWebSockets)
 * [IRremote ESP8266 Library](https://github.com/sebastienwarin/IRremoteESP8266)
 
-Download the Fermat source code here.
+Download the source code here.
 
 In Arduino, choose the following options from the Tools menu:
 
@@ -63,7 +63,7 @@ In Arduino, choose the following options from the Tools menu:
 
 Select the correct port for your board (it's easiest to unplug any other USB serial devices).
 
-Finally, click the Upload button.  Please report any errors, problems, questions, etc to the [Issue Tracker](https://bitbucket.org/Pup05/fermat/issues).
+Finally, click the Upload button.  Please report any errors, problems, questions, etc to the [Issue Tracker](https://github.com/evilgeniuslabs/tree-v2/issues).
 
 SPIFFS
 -----------
@@ -91,4 +91,4 @@ The firmware implements basic [RESTful web services](https://en.wikipedia.org/wi
 Support
 -------
 
-Please report any errors, problems, questions, etc to the [Issue Tracker](https://bitbucket.org/Pup05/tree-v2/issues).
+Please report any errors, problems, questions, etc to the [Issue Tracker](https://github.com/evilgeniuslabs/tree-v2/issues).
