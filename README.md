@@ -3,7 +3,11 @@ Tree - v2
 
 White xmas tree with 250 8mm WS2811 RGB LEDs, driven with an ESP8266, and controlled via a web app over Wi-Fi and/or IR remote control.
 
-![Fermat - Lux Phyllotaxis](https://d3s5r33r268y59.cloudfront.net/13194/products/thumbs/2016-06-25T22:28:38.450Z-fermat1.png.855x570_q85_pad_rcrop.jpg)
+[Demo Videos](https://youtu.be/eBLh7yvzN-Y?list=PLUYGVM-2vDxJLjAv6qwl_FOBu8xzAoJL4):
+
+[![Demo Videos](http://img.youtube.com/vi/eBLh7yvzN-Y/0.jpg)](https://youtu.be/eBLh7yvzN-Y?list=PLUYGVM-2vDxJLjAv6qwl_FOBu8xzAoJL4)
+
+More details: https://www.evilgeniuslabs.org/tree-v2.html
 
 Hardware
 --------

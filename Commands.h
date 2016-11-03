@@ -1,5 +1,5 @@
 /*
-   Fermat: https://Pup05@bitbucket.org/Pup05/fermat.git
+   Tree v2: https://github.com/evilgeniuslabs/tree-v2
    Copyright (C) 2015 Jason Coon
 
    This program is free software: you can redistribute it and/or modify
