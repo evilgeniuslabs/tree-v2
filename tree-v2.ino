@@ -1,5 +1,5 @@
 /*
-   Tree v2: https://github.com/evilgeniuslabs/tree-v2
+   Tree v2: https://Pup05@bitbucket.org/Pup05/tree-v2.git
    Copyright (C) 2016 Jason Coon
 
    This program is free software: you can redistribute it and/or modify
@@ -47,8 +47,8 @@ const bool apMode = false;
 const char WiFiAPPSK[] = "";
 
 // Wi-Fi network to connect to (if not in AP mode)
-const char* ssid = "SureWest-37";
-const char* password = "blackumbrella307";
+const char* ssid = "";
+const char* password = "";
 
 ESP8266WebServer webServer(80);
 WebSocketsServer webSocketsServer = WebSocketsServer(81);
