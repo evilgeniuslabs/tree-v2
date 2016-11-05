@@ -29,9 +29,9 @@
           <li><a href="/update" target="_blank">Update</a></li>
         </ul>
       </div>
-	</div>
+    </div>
   </nav>
-  <div class="container">
+  <div id="container" class="container">
     <form class="form-horizontal">
       <div class="form-group">
         <div class="col-sm-1 col-sm-offset-2">
@@ -47,8 +47,8 @@
         <label class="col-sm-2 control-label">Power</label>
         <div class="col-sm-6">
           <div class="btn-group" role="group" aria-label="Power">
-            <button type="button" class="btn btn-default" id="btnPowerOn">On</button>
-            <button type="button" class="btn btn-default" id="btnPowerOff">Off</button>
+            <button type="button" class="btn" id="btnPowerOn" data-link="class{:power?'btn btn-primary':'btn-default'}">On</button>
+            <button type="button" class="btn" id="btnPowerOff" data-link="class{:!power?'btn btn-primary':'btn btn-default'}">Off</button>
           </div>
         </div>
       </div>
@@ -56,17 +56,15 @@
         <label for="inputBrightness" class="col-sm-2 control-label">Brightness</label>
         <div class="col-sm-6">
           <div class="input-group">
-            <span class="input-group-addon" id="spanBrightness">128</span>
-            <input class="form-control" id="inputBrightness" type="range" step="1" min="0" max="255" />
+            <span class="input-group-addon" id="spanBrightness" data-link="brightness"></span>
+            <input class="form-control" id="inputBrightness" type="range" step="1" min="0" max="255" data-link="brightness" />
           </div>
         </div>
       </div>
       <div class="form-group">
         <label for="inputPattern" class="col-sm-2 control-label">Pattern</label>
         <div class="col-sm-6">
-          <select class="form-control" id="inputPattern">
-            <option></option>
-          </select>
+          <select class="form-control" id="inputPattern" data-link="html{for patterns tmpl='#patternOptionTemplate'} {:currentPattern.index:}"><select>
         </div>
       </div>
       <div class="form-group">
@@ -82,8 +80,8 @@
         <label for="inputAutoplayDuration" class="col-sm-2 control-label">Autoplay Duration (seconds)</label>
         <div class="col-sm-6">
           <div class="input-group">
-            <span class="input-group-addon" id="spanAutoplayDuration">10</span>
-            <input class="form-control" id="inputAutoplayDuration" type="range" step="1" min="1" max="255" />
+            <span class="input-group-addon" id="spanAutoplayDuration" data-link="autoplayDuration"></span>
+            <input class="form-control" id="inputAutoplayDuration" type="range" step="1" min="1" max="255" data-link="autoplayDuration" />
           </div>
         </div>
       </div>
@@ -105,33 +103,33 @@
             <div class="btn-group" role="group">
               <button type="button" class="btn btn-default btn-color" style="background: #FFFF00;" title="Yellow">&nbsp;</button>
             </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #80FF00;" title="Chartreuse">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #00FF00;" title="Green">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #00FF80;" title="Spring Green">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #00FFFF;" title="Cyan">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #0080FF;" title="Azure">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #0000FF;" title="Blue">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #8000FF;" title="Violet">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #FF00FF;" title="Magenta">&nbsp;</button>
-              </div>
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default btn-color" style="background: #FF0080;" title="Rose">&nbsp;</button>
-              </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #80FF00;" title="Chartreuse">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #00FF00;" title="Green">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #00FF80;" title="Spring Green">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #00FFFF;" title="Cyan">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #0080FF;" title="Azure">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #0000FF;" title="Blue">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #8000FF;" title="Violet">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #FF00FF;" title="Magenta">&nbsp;</button>
+            </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-default btn-color" style="background: #FF0080;" title="Rose">&nbsp;</button>
+            </div>
           </div>
         </div>
       </div>
@@ -139,8 +137,8 @@
         <label for="inputCooling" class="col-sm-2 control-label">Cooling</label>
         <div class="col-sm-6">
           <div class="input-group">
-            <span class="input-group-addon" id="spanCooling">49</span>
-            <input class="form-control" id="inputCooling" type="range" step="1" min="0" max="255" />
+            <span class="input-group-addon" id="spanCooling" data-link="cooling"></span>
+            <input class="form-control" id="inputCooling" type="range" step="1" min="0" max="255" data-link="cooling" />
           </div>
         </div>
       </div>
@@ -148,14 +146,17 @@
         <label for="inputSparking" class="col-sm-2 control-label">Sparking</label>
         <div class="col-sm-6">
           <div class="input-group">
-            <span class="input-group-addon" id="spanSparking">60</span>
-            <input class="form-control" id="inputSparking" type="range" step="1" min="0" max="255" />
+            <span class="input-group-addon" id="spanSparking" data-link="sparking"></span>
+            <input class="form-control" id="inputSparking" type="range" step="1" min="0" max="255" data-link="sparking" />
           </div>
         </div>
       </div>
     </form>
   </div>
   <script src="js/scripts.js"></script>
+  <script id="patternOptionTemplate" type="text/x-jsrender">
+    <option data-link="{:name} value{:index}"></option>
+  </script>
 </body>
 
 </html>
