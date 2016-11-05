@@ -35,75 +35,86 @@ if(jQuery)(function($){$.minicolors={defaults:{animationSpeed:50,animationEasing
  */
 !function(a,b){"function"==typeof define&&define.amd?define([],b):"undefined"!=typeof module&&module.exports?module.exports=b():a.ReconnectingWebSocket=b()}(this,function(){function a(b,c,d){function l(a,b){var c=document.createEvent("CustomEvent");return c.initCustomEvent(a,!1,!1,b),c}var e={debug:!1,automaticOpen:!0,reconnectInterval:1e3,maxReconnectInterval:3e4,reconnectDecay:1.5,timeoutInterval:2e3};d||(d={});for(var f in e)this[f]="undefined"!=typeof d[f]?d[f]:e[f];this.url=b,this.reconnectAttempts=0,this.readyState=WebSocket.CONNECTING,this.protocol=null;var h,g=this,i=!1,j=!1,k=document.createElement("div");k.addEventListener("open",function(a){g.onopen(a)}),k.addEventListener("close",function(a){g.onclose(a)}),k.addEventListener("connecting",function(a){g.onconnecting(a)}),k.addEventListener("message",function(a){g.onmessage(a)}),k.addEventListener("error",function(a){g.onerror(a)}),this.addEventListener=k.addEventListener.bind(k),this.removeEventListener=k.removeEventListener.bind(k),this.dispatchEvent=k.dispatchEvent.bind(k),this.open=function(b){h=new WebSocket(g.url,c||[]),b||k.dispatchEvent(l("connecting")),(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","attempt-connect",g.url);var d=h,e=setTimeout(function(){(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","connection-timeout",g.url),j=!0,d.close(),j=!1},g.timeoutInterval);h.onopen=function(){clearTimeout(e),(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","onopen",g.url),g.protocol=h.protocol,g.readyState=WebSocket.OPEN,g.reconnectAttempts=0;var d=l("open");d.isReconnect=b,b=!1,k.dispatchEvent(d)},h.onclose=function(c){if(clearTimeout(e),h=null,i)g.readyState=WebSocket.CLOSED,k.dispatchEvent(l("close"));else{g.readyState=WebSocket.CONNECTING;var d=l("connecting");d.code=c.code,d.reason=c.reason,d.wasClean=c.wasClean,k.dispatchEvent(d),b||j||((g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","onclose",g.url),k.dispatchEvent(l("close")));var e=g.reconnectInterval*Math.pow(g.reconnectDecay,g.reconnectAttempts);setTimeout(function(){g.reconnectAttempts++,g.open(!0)},e>g.maxReconnectInterval?g.maxReconnectInterval:e)}},h.onmessage=function(b){(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","onmessage",g.url,b.data);var c=l("message");c.data=b.data,k.dispatchEvent(c)},h.onerror=function(b){(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","onerror",g.url,b),k.dispatchEvent(l("error"))}},1==this.automaticOpen&&this.open(!1),this.send=function(b){if(h)return(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","send",g.url,b),h.send(b);throw"INVALID_STATE_ERR : Pausing to reconnect websocket"},this.close=function(a,b){"undefined"==typeof a&&(a=1e3),i=!0,h&&h.close(a,b)},this.refresh=function(){h&&h.close()}}return a.prototype.onopen=function(){},a.prototype.onclose=function(){},a.prototype.onconnecting=function(){},a.prototype.onmessage=function(){},a.prototype.onerror=function(){},a.debugAll=!1,a.CONNECTING=WebSocket.CONNECTING,a.OPEN=WebSocket.OPEN,a.CLOSING=WebSocket.CLOSING,a.CLOSED=WebSocket.CLOSED,a});
 
-// var urlBase = "http://192.168.1.24/"; // used when hosting the site somewhere other than the ESP8266 (handy for testing without waiting forever to upload to SPIFFS)
+var address = location.hostname;
+
+// var urlBase = "http://" + address + "/"; // used when hosting the site somewhere other than the ESP8266 (handy for testing without waiting forever to upload to SPIFFS)
+
 var urlBase = ""; // used when hosting the site on the ESP8266
 
 var postValueTimer = {};
 
 var ignoreColorChange = true;
 
-var allData = {
-  brightness: 255,
-  autoplayDuration: 10,
-  cooling: 49,
-  sparking: 50,
-  solidColor: {
-    r: 255,
-    g: 255,
-    b: 0
-  },
-  power: 1,
-  autoplay: 0,
-  patterns: [
-    "Rainbow",
-    "Color Waves"
-  ],
-  currentPattern: {
-    index: 0,
-    name: "Rainbow"
-  }
-};
+var allData = {};
 
+// var allData = {
+//   brightness: 255,
+//   autoplayDuration: 10,
+//   cooling: 49,
+//   sparking: 50,
+//   solidColor: {
+//     r: 255,
+//     g: 255,
+//     b: 0
+//   },
+//   power: 1,
+//   autoplay: 0,
+//   patterns: [
+//     "Rainbow",
+//     "Color Waves"
+//   ],
+//   currentPattern: {
+//     index: 0,
+//     name: "Rainbow"
+//   }
+// };
 
-var ws = {}; // new ReconnectingWebSocket('ws://' + location.hostname + ':81/', ['arduino']);
+var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
 ws.debug = true;
+
+var ignoreObservable = false;
 
 ws.onmessage = function(evt) {
   if(evt.data != null)
   {
     var data = JSON.parse(evt.data);
     if(data != null) {
-      if(data.power != null) {
-        updatePowerButtons(data.power);
-	  }
-	  if(data.autoplay != null) {
-        updateAutoplayButtons(data.autoplay);
-	  }
-      if(data.brightness != null) {
-        allData.brightness = data.brightness;
-        // updateBrightnessControls(data.brightness);
-      }
-      if(data.autoplayDuration != null) {
-        allData.autoplayDuration = data.autoplayDuration;
-        // updateAutoplayDurationControls(data.autoplayDuration);
-      }
-      if(data.cooling != null) {
-        allData.cooling = data.cooling;
-        // updateCoolingControls(data.cooling);
-      }
-      if(data.sparking != null) {
-        allData.sparking = data.sparking;
-        // updateSparkingControls(data.sparking);
-      }
-      if(data.solidColor != null && data.solidColor.r != null && data.solidColor.g != null && data.solidColor.b != null)
-      {
-        var hexString = rgbToHex(data.solidColor.r, data.solidColor.g, data.solidColor.b);
-        ignoreColorChange = true;
-        $("#inputColor").minicolors('value', hexString);
-        ignoreColorChange = false;
-      }
-      if(data.index != null) {
-        $("#inputPattern").val(data.index);
+      ignoreObservable = true;
+      try {
+        if(data.power != null) {
+          $.observable(allData).setProperty("power", data.power);
+        }
+        if(data.autoplay != null) {
+          $.observable(allData).setProperty("autoplay", data.autoplay);
+        }
+        if(data.brightness != null) {
+          $.observable(allData).setProperty("brightness", data.brightness);
+        }
+        if(data.autoplayDuration != null) {
+          $.observable(allData).setProperty("autoplayDuration", data.autoplayDuration);
+        }
+        if(data.cooling != null) {
+          $.observable(allData).setProperty("cooling", data.cooling);
+        }
+        if(data.sparking != null) {
+          $.observable(allData).setProperty("sparking", data.sparking);
+        }
+        if(data.solidColor != null && data.solidColor.r != null && data.solidColor.g != null && data.solidColor.b != null)
+        {
+          $.observable(allData).setProperty("solidColor.r", data.solidColor.r);
+          $.observable(allData).setProperty("solidColor.g", data.solidColor.g);
+          $.observable(allData).setProperty("solidColor.b", data.solidColor.b);
+
+          var hexString = rgbToHex(data.solidColor.r, data.solidColor.g, data.solidColor.b);
+          ignoreColorChange = true;
+          $("#inputColor").minicolors('value', hexString);
+          ignoreColorChange = false;
+        }
+        if(data.index != null) {
+          $.observable(allData).setProperty("currentPattern.index", data.index);
+        }
+      } finally {
+        ignoreObservable = false;
       }
     }
   }
@@ -127,73 +138,21 @@ $("#btnRefresh").click(function() {
   ws.refresh();
 });
 
-// $("#btnPowerOn").click(function() {
-//   postValue("power", 1);
-//   updatePowerButtons(1);
-// });
-//
-// $("#btnPowerOff").click(function() {
-//   postValue("power", 0);
-//   updatePowerButtons(0);
-// });
+$("#btnPowerOn").click(function() {
+  $.observable(allData).setProperty("power", 1);
+});
 
-// $("#btnAutoplayOn").click(function() {
-//   postValue("autoplay", 1);
-//   updateAutoplayButtons(0);
-// });
-//
-// $("#btnAutoplayOff").click(function() {
-//   postValue("autoplay", 0);
-//   updateAutoplayButtons(0);
-// });
+$("#btnPowerOff").click(function() {
+  $.observable(allData).setProperty("power", 0);
+});
 
-// $("#inputBrightness").on("change mousemove", function() {
-//    $("#spanBrightness").html($(this).val());
-// });
-//
-// $("#inputBrightness").on("change", function() {
-//   var brightness = $(this).val();
-//   $("#spanBrightness").html(brightness);
-//   delayPostValue("brightness", brightness);
-// });
+$("#btnAutoplayOn").click(function() {
+  $.observable(allData).setProperty("autoplay", 1);
+});
 
-// $("#inputAutoplayDuration").on("change mousemove", function() {
-//    $("#spanAutoplayDuration").html($(this).val());
-// });
-//
-// $("#inputAutoplayDuration").on("change", function() {
-//   var autoplayDuration = $(this).val();
-//   $("#spanAutoplayDuration").html(autoplayDuration);
-//   delayPostValue("autoplayDuration", autoplayDuration);
-// });
-
-// $("#inputCooling").on("change mousemove", function() {
-//    $("#spanCooling").html($(this).val());
-// });
-//
-// $("#inputCooling").on("change", function() {
-//   var cooling = $(this).val();
-//   $("#spanCooling").html(cooling);
-//   delayPostValue("cooling", cooling);
-// });
-//
-// $("#inputSparking").on("change mousemove", function() {
-//    $("#spanSparking").html($(this).val());
-// });
-//
-// $("#inputSparking").on("change", function() {
-//   var sparking = $(this).val();
-//    $("#spanSparking").html(sparking);
-//    delayPostValue("sparking", sparking);
-// });
-
-// $("#inputPattern").change(function() {
-//   var pattern = allData.currentPattern;
-//
-//   var patternIndex = $("#inputPattern option:selected").index();
-//
-//   postValue("pattern", pattern);
-// });
+$("#btnAutoplayOff").click(function() {
+  $.observable(allData).setProperty("autoplay", 0);
+});
 
 $("#inputColor").change(function() {
   if(ignoreColorChange) return;
@@ -218,22 +177,15 @@ $(".btn-color").click(function() {
 function getAll() {
   $("#status").html("Loading, please wait...");
 
-  // $.get(urlBase + "all", function(data) {
-    // allData = data;
+  $.get(urlBase + "all", function(data) {
+    allData = data;
 
     $("#status").html("Connecting...");
-    // updateBrightnessControls(allData.brightness);
-    // updateAutoplayDurationControls(allData.autoplayDuration);
-    // updateCoolingControls(allData.cooling);
-    // updateSparkingControls(allData.sparking);
 
     var hexString = rgbToHex(allData.solidColor.r, allData.solidColor.g, allData.solidColor.b);
     ignoreColorChange = true;
     $("#inputColor").minicolors('value', hexString);
     ignoreColorChange = false;
-
-    updatePowerButtons(allData.power);
-    updateAutoplayButtons(allData.autoplay);
 
     $("#inputPattern").find("option").remove();
 
@@ -253,7 +205,7 @@ function getAll() {
 
     $.observe(allData, "power", function(ev, eventArgs){
       var value = eventArgs.value;
-      postValue("power", value);
+        postValue("power", value);
     });
 
     $.observe(allData, "brightness", function(ev, eventArgs){
@@ -261,55 +213,28 @@ function getAll() {
       postValue("brightness", value);
     });
 
+    $.observe(allData, "autoplay", function(ev, eventArgs){
+      var value = eventArgs.value;
+      postValue("autoplay", value);
+    });
+
     $.observe(allData, "autoplayDuration", function(ev, eventArgs){
       var value = eventArgs.value;
       postValue("autoplayDuration", value);
     });
 
-    // $("#inputPattern").val(allData.currentPattern.index);
+    $.observe(allData, "cooling", function(ev, eventArgs){
+      var value = eventArgs.value;
+      postValue("cooling", value);
+    });
+
+    $.observe(allData, "sparking", function(ev, eventArgs){
+      var value = eventArgs.value;
+      postValue("sparking", value);
+    });
 
     $("#status").html("Ready");
-  // });
-}
-
-// function updateBrightnessControls(value) {
-//   $("#inputBrightness").val(value);
-//   $("#spanBrightness").html(value);
-// }
-//
-// function updateAutoplayDurationControls(value) {
-//   $("#inputAutoplayDuration").val(value);
-//   $("#spanAutoplayDuration").html(value);
-// }
-//
-// function updateCoolingControls(value) {
-//   $("#inputCooling").val(value);
-//   $("#spanCooling").html(value);
-// }
-//
-// function updateSparkingControls(value) {
-//   $("#inputSparking").val(value);
-//   $("#spanSparking").html(value);
-// }
-
-function updatePowerButtons(value) {
-  if(value == 0) {
-    $("#btnPowerOn").attr("class", "btn btn-default");
-    $("#btnPowerOff").attr("class", "btn btn-primary");
-  } else {
-    $("#btnPowerOn").attr("class", "btn btn-primary");
-    $("#btnPowerOff").attr("class", "btn btn-default");
-  }
-}
-
-function updateAutoplayButtons(value) {
-  if(value == 0) {
-    $("#btnAutoplayOn").attr("class", "btn btn-default");
-    $("#btnAutoplayOff").attr("class", "btn btn-primary");
-  } else {
-    $("#btnAutoplayOn").attr("class", "btn btn-primary");
-    $("#btnAutoplayOff").attr("class", "btn btn-default");
-  }
+  });
 }
 
 function delayPostValue(name, value) {
@@ -320,6 +245,9 @@ function delayPostValue(name, value) {
 }
 
 function postValue(name, value) {
+  if(ignoreObservable)
+    return;
+
   $.post(urlBase + name + "?value=" + value, function(data) {
     if(data.name != null) {
       $("#status").html("Set " + name + ": " + data.name);
