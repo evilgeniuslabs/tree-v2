@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tree v2 by Evil Genius Labs</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/jquery.minicolors.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="images/atom196.png">
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-static-top" id="top" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://www.evilgeniuslabs.org" target="_blank">Evil Genius Labs</a>
+      </div>
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/">Tree v2 <span class="sr-only">(current)</span></a></li>
+          <li><a href="/edit.htm" target="_blank">Edit</a></li>
+          <li><a href="/update" target="_blank">Update</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <form class="form-horizontal">
+
+      <div class="form-group">
+        <div class="col-sm-1 col-sm-offset-2">
+          <button type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-refresh" id="btnRefresh"></span>
+          </button>
+        </div>
+        <div class="col-sm-4">
+          <p class="form-control-static" data-bind="text: status"></p>
+        </div>
+      </div>
+
+      <!-- ko foreach: fields -->
+
+      <!-- ko if: (type() == "Boolean") -->
+      <div class="form-group">
+        <label data-bind="text: label" class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <div class="btn-group" role="group">
+              <button type="button" data-bind="css: value() == 1 ? 'btn btn-primary' : 'btn btn-default'">On</button>
+              <button type="button" data-bind="css: value() == 0 ? 'btn btn-primary' : 'btn btn-default'">Off</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /ko -->
+
+      <!-- ko if: (type() == "Number") -->
+      <div class="form-group">
+        <label data-bind="text: label" class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <span class="input-group-addon" data-bind="text: value"></span>
+            <input class="form-control" type="range" step="1" data-bind="min: min, max: max, textInput:value" />
+          </div>
+        </div>
+      </div>
+      <!-- /ko -->
+
+      <!-- ko if: (type() == "Color") -->
+      <div class="form-group">
+        <label data-bind="text: label" class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+          <input id="inputColor" type="text" class="form-control minicolors" data-bind="value: value">
+        </div>
+        <div class="col-sm-4">
+          <span class="input-group-addon" data-bind="text: value"></span>
+        </div>
+      </div>
+      <!-- /ko -->
+
+    <!-- /ko -->
+    </form>
+  </div>
+
+  <script src="js/knockout-3.4.1.js"></script>
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/knockout.mapping.min.js"></script>
+  <script src="js/jquery.minicolors.min.js"></script>
+  <script src="js/knockouttest.js"></script>
+
+</body>
+
+</html>
