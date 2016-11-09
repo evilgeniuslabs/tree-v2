@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FastLED.h"
+#include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
 extern "C" {
@@ -32,6 +32,7 @@ extern "C" {
 #include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include "GradientPalettes.h"
+#include <ArduinoJson.h>
 
 #define HOSTNAME "ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
 
@@ -409,6 +410,7 @@ typedef PatternAndName PatternAndNameList[];
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
 PatternAndNameList patterns = {
+  { election,               "Election" },
   { pride,                  "Pride" },
   { pride2,                 "Pride 2" },
 
@@ -914,7 +916,7 @@ void setAutoplayDuration(uint8_t value)
 
   EEPROM.write(7, autoplayDuration);
   EEPROM.commit();
-  
+
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
 
   broadcastInt("autoplayDuration", autoplayDuration);
@@ -1266,6 +1268,109 @@ void water()
 
 void draw()
 {
+}
+
+int maxVotes = 538;
+int dElectoral = 0;
+int rElectoral = 0;
+
+uint8_t dElectoralCount = 0;
+uint8_t rElectoralCount = 0;
+
+bool firstRequest = true;
+
+void election()
+{
+  if(firstRequest)
+    requestElectionData();
+
+  firstRequest = false;
+    
+  EVERY_N_SECONDS(10) {
+    requestElectionData();
+  }
+
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+  
+  for(uint8_t i = 0; i < NUM_LEDS; i++) {
+    if(levels[i] <= dElectoralCount)
+      leds[i] = CRGB::Blue;
+      
+    if(((levelCount - 1) - levels[i]) <= rElectoralCount)
+      leds[i] = CRGB::Red;
+  }
+}
+
+void requestElectionData() {
+  WiFiClient client;
+
+  // http://35.162.231.64/election2016.json
+
+  const char* host = "35.162.231.64";
+
+  const int httpPort = 80;
+
+  if (!client.connect(host, httpPort)) {
+    Serial.println("connection failed");
+    return;
+  }
+
+  // We now create a URI for the request
+  String url = "/election2016.json";
+
+  Serial.print("Requesting URL: ");
+  Serial.println(url);
+
+  // This will send the request to the server
+  client.println(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" +
+               "Connection: close\r\n\r\n");
+
+  unsigned long timeout = millis();
+
+  while (client.available() == 0) {
+    if (millis() - timeout > 5000) {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      return;
+    }
+  }
+
+  // Read all the lines of the reply from server and print them to Serial
+  while (client.available()) {
+    String line = client.readStringUntil('\r');
+    Serial.print(line);
+
+    // {"maxVotes": "538", "live": "true", "dElectoral": "3", "rElectoral": "19", "timestamp": "1478651369"}
+
+    StaticJsonBuffer<200> jsonBuffer;
+
+    JsonObject& root = jsonBuffer.parseObject(line);
+
+    maxVotes = root["maxVotes"];
+    dElectoral = root["dElectoral"];
+    rElectoral = root["rElectoral"];
+
+    Serial.print("maxVotes: ");
+    Serial.println(maxVotes);
+
+    Serial.print("dElectoral: ");
+    Serial.println(dElectoral);
+
+    Serial.print("rElectoral: ");
+    Serial.println(rElectoral);
+
+    if(maxVotes > 0) {
+      dElectoralCount = map(dElectoral, 0, maxVotes, 0, levelCount - 1);
+      rElectoralCount = map(rElectoral, 0, maxVotes, 0, levelCount - 1);
+    
+      Serial.print("dElectoralCount: ");
+      Serial.println(dElectoralCount);
+
+      Serial.print("rElectoralCount: ");
+      Serial.println(rElectoralCount);
+    }
+  }
 }
 
 // Pride2015 by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
