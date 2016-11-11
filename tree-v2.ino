@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FastLED.h"
+#include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
 extern "C" {
@@ -230,26 +230,6 @@ void setup() {
     if (String(WiFi.SSID()) != String(ssid)) {
       WiFi.begin(ssid, password);
     }
-
-    //    elapsedMillis elapsedConnecting = 0;
-    //
-    //    while (WiFi.status() != WL_CONNECTED) {
-    //      delay(500);
-    //      Serial.print(".");
-    //      if (elapsedConnecting > 5000)
-    //        break;
-    //    }
-    //
-    //    Serial.println();
-    //
-    //    if (WiFi.status() == WL_CONNECTED) {
-    //      Serial.print("Connected! Open http://");
-    //      Serial.print(WiFi.localIP());
-    //      Serial.println(" in your browser");
-    //    }
-    //    else {
-    //      Serial.println("Unable to connect, continuing startup.");
-    //    }
   }
 
   httpUpdateServer.setup(&webServer);
@@ -275,6 +255,7 @@ void setup() {
   webServer.on("/cooling", HTTP_POST, []() {
     String value = webServer.arg("value");
     cooling = value.toInt();
+    broadcastInt("cooling", cooling);
     sendVariable(cooling);
   });
 
@@ -285,11 +266,12 @@ void setup() {
   webServer.on("/sparking", HTTP_POST, []() {
     String value = webServer.arg("value");
     sparking = value.toInt();
+    broadcastInt("sparking", sparking);
     sendVariable(sparking);
   });
 
   webServer.on("/solidColor", HTTP_GET, []() {
-    sendSolidColor();
+    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
@@ -297,27 +279,27 @@ void setup() {
     String g = webServer.arg("g");
     String b = webServer.arg("b");
     setSolidColor(r.toInt(), g.toInt(), b.toInt());
-    sendSolidColor();
+    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
   });
 
   webServer.on("/pattern", HTTP_GET, []() {
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/pattern", HTTP_POST, []() {
     String value = webServer.arg("value");
     setPattern(value.toInt());
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/patternUp", HTTP_POST, []() {
     adjustPattern(true);
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/patternDown", HTTP_POST, []() {
     adjustPattern(false);
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/brightness", HTTP_GET, []() {
@@ -789,81 +771,31 @@ void broadcastAll()
 
 String getAllJson()
 {
-  String json = "{";
+  String json = "[";
 
-  json += "\"power\":" + String(power) + ",";
-  json += "\"brightness\":" + String(brightness) + ",";
+  json += "{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":" + String(power) + "},";
+  json += "{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":" + String(brightness) + "},";
 
-  json += "\"autoplay\":" + String(autoplay) + ",";
-  json += "\"autoplayDuration\":" + String(autoplayDuration) + ",";
-
-  json += "\"cooling\":" + String(cooling) + ",";
-  json += "\"sparking\":" + String(sparking) + ",";
-
-  json += "\"currentPattern\":{";
-  json += "\"index\":" + String(currentPatternIndex);
-  json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"}";
-
-  json += ",\"solidColor\":{";
-  json += "\"r\":" + String(solidColor.r);
-  json += ",\"g\":" + String(solidColor.g);
-  json += ",\"b\":" + String(solidColor.b);
-  json += "}";
-
-  json += ",\"patterns\":[";
+  json += "{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":" + String(currentPatternIndex) + ",\"options\":[";
   for (uint8_t i = 0; i < patternCount; i++)
   {
     json += "\"" + patterns[i].name + "\"";
     if (i < patternCount - 1)
       json += ",";
   }
+  json += "]},";
+
+  json += "{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":" + String(autoplay) + "},";
+  json += "{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":" + String(autoplayDuration) + "},";
+
+  json += "{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"" + String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b) +"\"},";
+
+  json += "{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":" + String(cooling) + "},";
+  json += "{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":" + String(sparking) + "}";
+  
   json += "]";
 
-  json += "}";
-
   return json;
-}
-
-void sendPattern()
-{
-  String json = "{";
-  json += "\"index\":" + String(currentPatternIndex);
-  json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"";
-  json += "}";
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastPattern()
-{
-  String json = "{";
-  json += "\"index\":" + String(currentPatternIndex);
-  json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"";
-  json += "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
-void sendSolidColor()
-{
-  String json = "{";
-  json += "\"r\":" + String(solidColor.r);
-  json += ",\"g\":" + String(solidColor.g);
-  json += ",\"b\":" + String(solidColor.b);
-  json += "}";
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastSolidColor()
-{
-  String json = "{";
-  json += "\"solidColor\":{";
-  json += "\"r\":" + String(solidColor.r);
-  json += ",\"g\":" + String(solidColor.g);
-  json += ",\"b\":" + String(solidColor.b);
-  json += "}";
-  json += "}";
-  webSocketsServer.broadcastTXT(json);
 }
 
 void sendVariable(uint8_t value)
@@ -878,13 +810,13 @@ void sendVariable(String value)
 
 void broadcastInt(String name, uint8_t value)
 {
-  String s = String(value);
-  broadcastString(name, s);
+  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}"; 
+  webSocketsServer.broadcastTXT(json);
 }
 
 void broadcastString(String name, String value)
 {
-  String json = "{\"" + name + "\":" + value + "}";
+  String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
   webSocketsServer.broadcastTXT(json);
 }
 
@@ -914,7 +846,7 @@ void setAutoplayDuration(uint8_t value)
 
   EEPROM.write(7, autoplayDuration);
   EEPROM.commit();
-  
+
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
 
   broadcastInt("autoplayDuration", autoplayDuration);
@@ -936,7 +868,7 @@ void setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 
   setPattern(patternCount - 1);
 
-  broadcastSolidColor();
+  broadcastString("color", String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
 }
 
 // increase or decrease the current pattern number, and wrap around at the ends
@@ -956,7 +888,7 @@ void adjustPattern(bool up)
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
 
-  broadcastPattern();
+  broadcastInt("pattern", currentPatternIndex);
 }
 
 void setPattern(uint8_t value)
@@ -969,7 +901,7 @@ void setPattern(uint8_t value)
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
 
-  broadcastPattern();
+  broadcastInt("pattern", currentPatternIndex);
 }
 
 void adjustBrightness(bool up)
