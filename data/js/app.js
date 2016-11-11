@@ -27,6 +27,8 @@ $(document).ready(function() {
   $("#status").html("Connecting, please wait...");
 
   $.get(urlBase + "all", function(data) {
+      $("#status").html("Loading, please wait...");
+
       $.each(data, function(index, field) {
         if (field.type == "Number") {
           addNumberField(field);
@@ -47,6 +49,8 @@ $(document).ready(function() {
         format: "rgb",
         inline: true
       });
+
+      $("#status").html("Ready");
     })
     .fail(function(errorThrown) {
       console.log("error: " + errorThrown);

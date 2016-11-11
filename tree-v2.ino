@@ -1,5 +1,5 @@
 /*
-   Tree v2: https://Pup05@bitbucket.org/Pup05/tree-v2.git
+   Tree v2: https://github.com/evilgeniuslabs/tree-v2
    Copyright (C) 2016 Jason Coon
 
    This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@ extern "C" {
 #include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include "GradientPalettes.h"
+#include "Field.h"
 
 #define HOSTNAME "ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
 
@@ -73,7 +74,8 @@ uint8_t patternIndex = 0;
 const uint8_t brightnessCount = 5;
 uint8_t brightnessMap[brightnessCount] = { 16, 32, 64, 128, 255 };
 uint8_t brightnessIndex = 0;
-uint8_t brightness = brightnessMap[brightnessIndex];
+
+#include "Fields.h"
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -135,8 +137,6 @@ uint8_t paletteCount = ARRAY_SIZE(palettes);
 
 CRGBPalette16 currentPalette(CRGB::Black);
 CRGBPalette16 targetPalette = palettes[paletteIndex];
-
-uint8_t power = 1;
 
 void setup() {
   Serial.begin(115200);
