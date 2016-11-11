@@ -230,26 +230,6 @@ void setup() {
     if (String(WiFi.SSID()) != String(ssid)) {
       WiFi.begin(ssid, password);
     }
-
-    //    elapsedMillis elapsedConnecting = 0;
-    //
-    //    while (WiFi.status() != WL_CONNECTED) {
-    //      delay(500);
-    //      Serial.print(".");
-    //      if (elapsedConnecting > 5000)
-    //        break;
-    //    }
-    //
-    //    Serial.println();
-    //
-    //    if (WiFi.status() == WL_CONNECTED) {
-    //      Serial.print("Connected! Open http://");
-    //      Serial.print(WiFi.localIP());
-    //      Serial.println(" in your browser");
-    //    }
-    //    else {
-    //      Serial.println("Unable to connect, continuing startup.");
-    //    }
   }
 
   httpUpdateServer.setup(&webServer);
@@ -275,6 +255,7 @@ void setup() {
   webServer.on("/cooling", HTTP_POST, []() {
     String value = webServer.arg("value");
     cooling = value.toInt();
+    broadcastInt("cooling", cooling);
     sendVariable(cooling);
   });
 
@@ -285,11 +266,12 @@ void setup() {
   webServer.on("/sparking", HTTP_POST, []() {
     String value = webServer.arg("value");
     sparking = value.toInt();
+    broadcastInt("sparking", sparking);
     sendVariable(sparking);
   });
 
   webServer.on("/solidColor", HTTP_GET, []() {
-    sendSolidColor();
+    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
@@ -297,27 +279,27 @@ void setup() {
     String g = webServer.arg("g");
     String b = webServer.arg("b");
     setSolidColor(r.toInt(), g.toInt(), b.toInt());
-    sendSolidColor();
+    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
   });
 
   webServer.on("/pattern", HTTP_GET, []() {
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/pattern", HTTP_POST, []() {
     String value = webServer.arg("value");
     setPattern(value.toInt());
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/patternUp", HTTP_POST, []() {
     adjustPattern(true);
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/patternDown", HTTP_POST, []() {
     adjustPattern(false);
-    sendPattern();
+    sendVariable(currentPatternIndex);
   });
 
   webServer.on("/brightness", HTTP_GET, []() {
@@ -816,48 +798,6 @@ String getAllJson()
   return json;
 }
 
-void sendPattern()
-{
-  String json = "{";
-  json += "\"index\":" + String(currentPatternIndex);
-  json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"";
-  json += "}";
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastPattern()
-{
-  String json = "{";
-  json += "\"index\":" + String(currentPatternIndex);
-  json += ",\"name\":\"" + patterns[currentPatternIndex].name + "\"";
-  json += "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
-void sendSolidColor()
-{
-  String json = "{";
-  json += "\"r\":" + String(solidColor.r);
-  json += ",\"g\":" + String(solidColor.g);
-  json += ",\"b\":" + String(solidColor.b);
-  json += "}";
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastSolidColor()
-{
-  String json = "{";
-  json += "\"solidColor\":{";
-  json += "\"r\":" + String(solidColor.r);
-  json += ",\"g\":" + String(solidColor.g);
-  json += ",\"b\":" + String(solidColor.b);
-  json += "}";
-  json += "}";
-  webSocketsServer.broadcastTXT(json);
-}
-
 void sendVariable(uint8_t value)
 {
   sendVariable(String(value));
@@ -870,13 +810,13 @@ void sendVariable(String value)
 
 void broadcastInt(String name, uint8_t value)
 {
-  String s = String(value);
-  broadcastString(name, s);
+  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}"; 
+  webSocketsServer.broadcastTXT(json);
 }
 
 void broadcastString(String name, String value)
 {
-  String json = "{\"" + name + "\":" + value + "}";
+  String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
   webSocketsServer.broadcastTXT(json);
 }
 
@@ -928,7 +868,7 @@ void setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 
   setPattern(patternCount - 1);
 
-  broadcastSolidColor();
+  broadcastString("color", String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
 }
 
 // increase or decrease the current pattern number, and wrap around at the ends
@@ -948,7 +888,7 @@ void adjustPattern(bool up)
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
 
-  broadcastPattern();
+  broadcastInt("pattern", currentPatternIndex);
 }
 
 void setPattern(uint8_t value)
@@ -961,7 +901,7 @@ void setPattern(uint8_t value)
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
 
-  broadcastPattern();
+  broadcastInt("pattern", currentPatternIndex);
 }
 
 void adjustBrightness(bool up)

@@ -1,15 +1,27 @@
 // used when hosting the site on the ESP8266
-// var address = location.hostname;
-// var urlBase = "";
+var address = location.hostname;
+var urlBase = "";
 
 // used when hosting the site somewhere other than the ESP8266 (handy for testing without waiting forever to upload to SPIFFS)
-var address = "esp8266-1920f7.local";
-var urlBase = "http://" + address + "/";
+// var address = "esp8266-1920f7.local";
+// var urlBase = "http://" + address + "/";
 
 var postColorTimer = {};
 var postValueTimer = {};
 
 var ignoreColorChange = false;
+
+var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
+ws.debug = true;
+
+ws.onmessage = function(evt) {
+  if(evt.data != null)
+  {
+    var data = JSON.parse(evt.data);
+    if(data == null) return;
+    updateFieldValue(data.name, data.value);
+  }
+}
 
 $(document).ready(function() {
   $("#status").html("Connecting, please wait...");
@@ -45,6 +57,7 @@ function addNumberField(field) {
   var template = $("#numberTemplate").clone();
 
   template.attr("id", "form-group-" + field.name);
+  template.attr("data-field-type", field.type);
 
   var label = template.find(".control-label");
   label.attr("for", "input-" + field.name);
@@ -84,6 +97,7 @@ function addBooleanField(field) {
   var template = $("#booleanTemplate").clone();
 
   template.attr("id", "form-group-" + field.name);
+  template.attr("data-field-type", field.type);
 
   var label = template.find(".control-label");
   label.attr("for", "btn-group-" + field.name);
@@ -115,6 +129,7 @@ function addSelectField(field) {
   var template = $("#selectTemplate").clone();
 
   template.attr("id", "form-group-" + field.name);
+  template.attr("data-field-type", field.type);
 
   var id = "input-" + field.name;
 
@@ -147,6 +162,7 @@ function addColorFieldPicker(field) {
   var template = $("#colorTemplate1").clone();
 
   template.attr("id", "form-group-" + field.name);
+  template.attr("data-field-type", field.type);
 
   var id = "input-" + field.name;
 
@@ -174,8 +190,6 @@ function addColorFieldPicker(field) {
 function addColorFieldButtons(field) {
   var template = $("#colorTemplate2").clone();
 
-  template.attr("id", "form-group-" + field.name);
-
   var buttons = template.find(".btn-color");
 
   buttons.each(function(index, button) {
@@ -194,6 +208,30 @@ function addColorFieldButtons(field) {
 
   $("#form").append(template);
 }
+
+function updateFieldValue(name, value) {
+  var group = $("#form-group-" + name);
+
+  var type = group.attr("data-field-type");
+
+  if (type == "Number") {
+    var input = group.find(".form-control");
+    input.val(value);
+  } else if (type == "Boolean") {
+    var btnOn = group.find("#btnOn" + name);
+    var btnOff = group.find("#btnOff" + name);
+
+    btnOn.attr("class", value ? "btn btn-primary" : "btn btn-default");
+    btnOff.attr("class", !value ? "btn btn-primary" : "btn btn-default");
+
+  } else if (type == "Select") {
+    var select = group.find(".form-control");
+    select.val(value);
+  } else if (type == "Color") {
+    var input = group.find(".form-control");
+    input.val("rgb(" + value + ")");
+  }
+};
 
 function setBooleanFieldValue(field, btnOn, btnOff, value) {
   field.value = value;

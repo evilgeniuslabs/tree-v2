@@ -79,9 +79,9 @@ The web app files can be gzip compressed before uploading to SPIFFS by running `
 
 `gzip -r data/`
 
-The ESP8266WebServer will automatically serve any .gz file.  The file index.htm.gz will get served as index.htm, with the content-encoding header set to gzip, so the browser knows to decompress it.  The ESP8266WebServer doesn't seem to like the Glyphicon fonts gzipped, though, so I decompress them with this command:
+The ESP8266WebServer will automatically serve any .gz file.  The file index.htm.gz will get served as index.htm, with the content-encoding header set to gzip, so the browser knows to decompress it. The files can be decompressed for editing with this command:
 
-`gunzip -r data/fonts/`
+`gunzip -r data/`
 
 REST Web services
 -----------------
