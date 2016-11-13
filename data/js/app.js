@@ -27,6 +27,8 @@ $(document).ready(function() {
   $("#status").html("Connecting, please wait...");
 
   $.get(urlBase + "all", function(data) {
+      $("#status").html("Loading, please wait...");
+
       $.each(data, function(index, field) {
         if (field.type == "Number") {
           addNumberField(field);
@@ -37,6 +39,8 @@ $(document).ready(function() {
         } else if (field.type == "Color") {
           addColorFieldPicker(field);
           addColorFieldButtons(field);
+        } else if (field.type == "Section") {
+          addSectionField(field);
         }
       });
 
@@ -47,6 +51,8 @@ $(document).ready(function() {
         format: "rgb",
         inline: true
       });
+
+      $("#status").html("Ready");
     })
     .fail(function(errorThrown) {
       console.log("error: " + errorThrown);
@@ -205,6 +211,15 @@ function addColorFieldButtons(field) {
       ignoreColorChange = false;
     });
   });
+
+  $("#form").append(template);
+}
+
+function addSectionField(field) {
+  var template = $("#sectionTemplate").clone();
+
+  template.attr("id", "form-group-section-" + field.name);
+  template.attr("data-field-type", field.type);
 
   $("#form").append(template);
 }

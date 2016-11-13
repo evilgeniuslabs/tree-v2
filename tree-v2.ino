@@ -1,5 +1,5 @@
 /*
-   Tree v2: https://Pup05@bitbucket.org/Pup05/tree-v2.git
+   Tree v2: https://github.com/evilgeniuslabs/tree-v2
    Copyright (C) 2016 Jason Coon
 
    This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,10 @@ extern "C" {
 #include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include "GradientPalettes.h"
+
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+
+#include "Field.h"
 
 #define HOSTNAME "ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
 
@@ -73,9 +77,6 @@ uint8_t patternIndex = 0;
 const uint8_t brightnessCount = 5;
 uint8_t brightnessMap[brightnessCount] = { 16, 32, 64, 128, 255 };
 uint8_t brightnessIndex = 0;
-uint8_t brightness = brightnessMap[brightnessIndex];
-
-#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
@@ -90,6 +91,8 @@ uint8_t cooling = 49;
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
 uint8_t sparking = 60;
+
+uint8_t speed = 30;
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -136,7 +139,74 @@ uint8_t paletteCount = ARRAY_SIZE(palettes);
 CRGBPalette16 currentPalette(CRGB::Black);
 CRGBPalette16 targetPalette = palettes[paletteIndex];
 
-uint8_t power = 1;
+// scale the brightness of all pixels down
+void dimAll(byte value)
+{
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i].nscale8(value);
+  }
+}
+
+typedef void (*Pattern)();
+typedef Pattern PatternList[];
+typedef struct {
+  Pattern pattern;
+  String name;
+} PatternAndName;
+typedef PatternAndName PatternAndNameList[];
+
+#include "Twinkles.h"
+
+// List of patterns to cycle through.  Each is defined as a separate function below.
+
+PatternAndNameList patterns = {
+  { pride,                  "Pride" },
+  { pride2,                 "Pride 2" },
+
+  { colorWaves,             "Color Waves" },
+  { colorWaves2,             "Color Waves 2" },
+
+  { northwardRainbow,       "Northward Rainbow" },
+  { northeastwardRainbow,   "Northeastward Rainbow" },
+  { eastwardRainbow,        "Eastward Rainbow" },
+  { southeastwardRainbow,   "Southeastward Rainbow" },
+  { southwardRainbow,       "Southward Rainbow" },
+  { southwestwardRainbow,   "Southwestward Rainbow" },
+  { westwardRainbow,        "Westward Rainbow" },
+  { northwestwardRainbow,   "Northwestward Rainbow" },
+
+  { rotatingRainbow,        "Rotating Rainbow" },
+  { outwardRainbow,         "Outward Rainbow" },
+  { inwardRainbow,          "Inward Rainbow" },
+  { fallingRainbow,         "Falling Rainbow" },
+  { risingRainbow,          "Rising Rainbow" },
+
+  { rotatingPalette,        "Rotating Palette" },
+  { outwardPalette,         "Outward Palette" },
+  { inwardPalette,          "Inward Palette" },
+  { fallingPalette,         "Falling Palette" },
+  { risingPalette,          "Rising Palette" },
+
+  { rainbowTwinkles,        "Rainbow Twinkles" },
+  { snowTwinkles,           "Snow Twinkles" },
+  { cloudTwinkles,          "Cloud Twinkles" },
+  { incandescentTwinkles,   "Incandescent Twinkles" },
+  { rainbow,                "Rainbow" },
+  { rainbowWithGlitter,     "Rainbow With Glitter" },
+  { rainbowSolid,           "Solid Rainbow" },
+  { confetti,               "Confetti" },
+  { sinelon,                "Sinelon" },
+  { bpm,                    "Beat" },
+  { juggle,                 "Juggle" },
+  { fire,                   "Fire" },
+  { water,                  "Water" },
+  //  { draw,                   "Draw" },
+  { showSolidColor,         "Solid Color" }
+};
+
+const uint8_t patternCount = ARRAY_SIZE(patterns);
+
+#include "Fields.h"
 
 void setup() {
   Serial.begin(115200);
@@ -235,43 +305,48 @@ void setup() {
   httpUpdateServer.setup(&webServer);
 
   webServer.on("/all", HTTP_GET, []() {
-    sendAll();
+    String json = getFieldsJson(fields, fieldCount);
+    webServer.send(200, "text/json", json);
   });
 
-  webServer.on("/power", HTTP_GET, []() {
-    sendVariable(power);
+  webServer.on("/fieldValue", HTTP_GET, []() {
+    String name = webServer.arg("name");
+    String value = getFieldValue(name, fields, fieldCount);
+    webServer.send(200, "text/json", value);
+  });
+
+  webServer.on("/fieldValue", HTTP_POST, []() {
+    String name = webServer.arg("name");
+    String value = webServer.arg("value");
+    String newValue = setFieldValue(name, value, fields, fieldCount);
+    webServer.send(200, "text/json", newValue);
   });
 
   webServer.on("/power", HTTP_POST, []() {
     String value = webServer.arg("value");
     setPower(value.toInt());
-    sendVariable(power);
-  });
-
-  webServer.on("/cooling", HTTP_GET, []() {
-    sendVariable(cooling);
+    sendInt(power);
   });
 
   webServer.on("/cooling", HTTP_POST, []() {
     String value = webServer.arg("value");
     cooling = value.toInt();
     broadcastInt("cooling", cooling);
-    sendVariable(cooling);
-  });
-
-  webServer.on("/sparking", HTTP_GET, []() {
-    sendVariable(sparking);
+    sendInt(cooling);
   });
 
   webServer.on("/sparking", HTTP_POST, []() {
     String value = webServer.arg("value");
     sparking = value.toInt();
     broadcastInt("sparking", sparking);
-    sendVariable(sparking);
+    sendInt(sparking);
   });
 
-  webServer.on("/solidColor", HTTP_GET, []() {
-    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
+  webServer.on("/speed", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    speed = value.toInt();
+    broadcastInt("speed", speed);
+    sendInt(speed);
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
@@ -279,67 +354,31 @@ void setup() {
     String g = webServer.arg("g");
     String b = webServer.arg("b");
     setSolidColor(r.toInt(), g.toInt(), b.toInt());
-    sendVariable(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
-  });
-
-  webServer.on("/pattern", HTTP_GET, []() {
-    sendVariable(currentPatternIndex);
+    sendString(String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b));
   });
 
   webServer.on("/pattern", HTTP_POST, []() {
     String value = webServer.arg("value");
     setPattern(value.toInt());
-    sendVariable(currentPatternIndex);
-  });
-
-  webServer.on("/patternUp", HTTP_POST, []() {
-    adjustPattern(true);
-    sendVariable(currentPatternIndex);
-  });
-
-  webServer.on("/patternDown", HTTP_POST, []() {
-    adjustPattern(false);
-    sendVariable(currentPatternIndex);
-  });
-
-  webServer.on("/brightness", HTTP_GET, []() {
-    sendVariable(brightness);
+    sendInt(currentPatternIndex);
   });
 
   webServer.on("/brightness", HTTP_POST, []() {
     String value = webServer.arg("value");
     setBrightness(value.toInt());
-    sendVariable(brightness);
-  });
-
-  webServer.on("/brightnessUp", HTTP_POST, []() {
-    adjustBrightness(true);
-    sendVariable(brightness);
-  });
-
-  webServer.on("/brightnessDown", HTTP_POST, []() {
-    adjustBrightness(false);
-    sendVariable(brightness);
-  });
-
-  webServer.on("/autoplay", HTTP_GET, []() {
-    sendVariable(autoplay);
+    sendInt(brightness);
   });
 
   webServer.on("/autoplay", HTTP_POST, []() {
     String value = webServer.arg("value");
     setAutoplay(value.toInt());
-    sendVariable(autoplay);
-  });
-
-  webServer.on("/autoplayDuration", HTTP_GET, []() {
-    sendVariable(autoplayDuration);
+    sendInt(autoplay);
   });
 
   webServer.on("/autoplayDuration", HTTP_POST, []() {
     String value = webServer.arg("value");
     setAutoplayDuration(value.toInt());
-    sendVariable(autoplayDuration);
+    sendInt(autoplayDuration);
   });
 
   //list directory
@@ -370,74 +409,29 @@ void setup() {
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
 }
 
-// scale the brightness of all pixels down
-void dimAll(byte value)
+void sendInt(uint8_t value)
 {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i].nscale8(value);
-  }
+  sendString(String(value));
 }
 
-typedef void (*Pattern)();
-typedef Pattern PatternList[];
-typedef struct {
-  Pattern pattern;
-  String name;
-} PatternAndName;
-typedef PatternAndName PatternAndNameList[];
+void sendString(String value)
+{
+  webServer.send(200, "text/json", value);
+}
 
-#include "Twinkles.h"
+void broadcastInt(String name, uint8_t value)
+{
+  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}"; 
+  webSocketsServer.broadcastTXT(json);
+}
 
-// List of patterns to cycle through.  Each is defined as a separate function below.
+void broadcastString(String name, String value)
+{
+  String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
+  webSocketsServer.broadcastTXT(json);
+}
 
-PatternAndNameList patterns = {
-  { pride,                  "Pride" },
-  { pride2,                 "Pride 2" },
-
-  { colorWaves,             "Color Waves" },
-  { colorWaves2,             "Color Waves 2" },
-
-  { northwardRainbow,       "Northward Rainbow" },
-  { northeastwardRainbow,   "Northeastward Rainbow" },
-  { eastwardRainbow,        "Eastward Rainbow" },
-  { southeastwardRainbow,   "Southeastward Rainbow" },
-  { southwardRainbow,       "Southward Rainbow" },
-  { southwestwardRainbow,   "Southwestward Rainbow" },
-  { westwardRainbow,        "Westward Rainbow" },
-  { northwestwardRainbow,   "Northwestward Rainbow" },
-
-  { rotatingRainbow,        "Rotating Rainbow" },
-  { outwardRainbow,         "Outward Rainbow" },
-  { inwardRainbow,          "Inward Rainbow" },
-  { fallingRainbow,         "Falling Rainbow" },
-  { risingRainbow,          "Rising Rainbow" },
-
-  { rotatingPalette,        "Rotating Palette" },
-  { outwardPalette,         "Outward Palette" },
-  { inwardPalette,          "Inward Palette" },
-  { fallingPalette,         "Falling Palette" },
-  { risingPalette,          "Rising Palette" },
-
-  { rainbowTwinkles,        "Rainbow Twinkles" },
-  { snowTwinkles,           "Snow Twinkles" },
-  { cloudTwinkles,          "Cloud Twinkles" },
-  { incandescentTwinkles,   "Incandescent Twinkles" },
-  { rainbow,                "Rainbow" },
-  { rainbowWithGlitter,     "Rainbow With Glitter" },
-  { rainbowSolid,           "Solid Rainbow" },
-  { confetti,               "Confetti" },
-  { sinelon,                "Sinelon" },
-  { bpm,                    "Beat" },
-  { juggle,                 "Juggle" },
-  { fire,                   "Fire" },
-  { water,                  "Water" },
-  //  { draw,                   "Draw" },
-  { showSolidColor,         "Solid Color" }
-};
-
-const uint8_t patternCount = ARRAY_SIZE(patterns);
-
-void loop(void) {
+void loop() {
   // Add entropy to random number generator; we use a lot of it.
   random16_add_entropy(random(65535));
 
@@ -453,9 +447,9 @@ void loop(void) {
     return;
   }
 
-  // EVERY_N_SECONDS(10) {
-  //   Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
-  // }
+//   EVERY_N_SECONDS(10) {
+//     Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
+//   }
 
   // change to a new cpt-city gradient palette
   EVERY_N_SECONDS( secondsPerPalette ) {
@@ -756,70 +750,6 @@ void loadSettings()
   autoplayDuration = EEPROM.read(7);
 }
 
-void sendAll()
-{
-  String json = getAllJson();
-  webServer.send(200, "text/json", json);
-  json = String();
-}
-
-void broadcastAll()
-{
-  String json = getAllJson();
-  webSocketsServer.broadcastTXT(json);
-}
-
-String getAllJson()
-{
-  String json = "[";
-
-  json += "{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":" + String(power) + "},";
-  json += "{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":" + String(brightness) + "},";
-
-  json += "{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":" + String(currentPatternIndex) + ",\"options\":[";
-  for (uint8_t i = 0; i < patternCount; i++)
-  {
-    json += "\"" + patterns[i].name + "\"";
-    if (i < patternCount - 1)
-      json += ",";
-  }
-  json += "]},";
-
-  json += "{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":" + String(autoplay) + "},";
-  json += "{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":" + String(autoplayDuration) + "},";
-
-  json += "{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"" + String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b) +"\"},";
-
-  json += "{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":" + String(cooling) + "},";
-  json += "{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":" + String(sparking) + "}";
-  
-  json += "]";
-
-  return json;
-}
-
-void sendVariable(uint8_t value)
-{
-  sendVariable(String(value));
-}
-
-void sendVariable(String value)
-{
-  webServer.send(200, "text/json", value);
-}
-
-void broadcastInt(String name, uint8_t value)
-{
-  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}"; 
-  webSocketsServer.broadcastTXT(json);
-}
-
-void broadcastString(String name, String value)
-{
-  String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
-  webSocketsServer.broadcastTXT(json);
-}
-
 void setPower(uint8_t value)
 {
   power = value == 0 ? 0 : 1;
@@ -964,7 +894,7 @@ void northwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(yCoords[i] - beat8(60), 255, 255);
+    leds[i] = CHSV(yCoords[i] - beat8(speed), 255, 255);
   }
 }
 
@@ -972,7 +902,7 @@ void northeastwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(60), 255, 255);
+    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
 }
 
@@ -980,7 +910,7 @@ void eastwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(xCoords[i] - beat8(60), 255, 255);
+    leds[i] = CHSV(xCoords[i] - beat8(speed), 255, 255);
   }
 }
 
@@ -988,7 +918,7 @@ void southeastwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV((xCoords[i] - yCoords[i]) + beat8(60), 255, 255);
+    leds[i] = CHSV((xCoords[i] - yCoords[i]) + beat8(speed), 255, 255);
   }
 }
 
@@ -996,7 +926,7 @@ void southwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(yCoords[i] + beat8(60), 255, 255);
+    leds[i] = CHSV(yCoords[i] + beat8(speed), 255, 255);
   }
 }
 
@@ -1004,7 +934,7 @@ void southwestwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(60), 255, 255);
+    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
 }
 
@@ -1012,7 +942,7 @@ void westwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(xCoords[i] + beat8(60), 255, 255);
+    leds[i] = CHSV(xCoords[i] + beat8(speed), 255, 255);
   }
 }
 
@@ -1020,7 +950,7 @@ void northwestwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(60), 255, 255);
+    leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
 }
 
@@ -1028,7 +958,7 @@ void inwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(conicalRadii[i] * 32 + beat8(15), 255, 255);
+    leds[i] = CHSV(radii[i] / 4 + beat8(speed), 255, 255);
   }
 }
 
@@ -1036,7 +966,7 @@ void outwardRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(conicalRadii[i] * 32 - beat8(15), 255, 255);
+    leds[i] = CHSV(radii[i] / 4 - beat8(speed), 255, 255);
   }
 }
 
@@ -1044,7 +974,7 @@ void rotatingRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(angles[i] + beat8(60), 255, 255);
+    leds[i] = CHSV(angles[i] + beat8(speed), 255, 255);
   }
 }
 
@@ -1052,7 +982,7 @@ void risingRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(zCoords[i] - beat8(30), 255, 255);
+    leds[i] = CHSV(zCoords[i] - beat8(speed), 255, 255);
   }
 }
 
@@ -1060,7 +990,7 @@ void fallingRainbow()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = CHSV(zCoords[i] + beat8(30), 255, 255);
+    leds[i] = CHSV(zCoords[i] + beat8(speed), 255, 255);
   }
 }
 
@@ -1070,7 +1000,7 @@ void inwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, conicalRadii[i] * 32 + beat8(15));
+    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] / 4 + beat8(speed));
   }
 }
 
@@ -1078,7 +1008,7 @@ void outwardPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, conicalRadii[i] * 32 - beat8(15));
+    leds[i] = ColorFromPalette(gCurrentPalette, radii[i] / 4 - beat8(speed));
   }
 }
 
@@ -1086,7 +1016,7 @@ void rotatingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, angles[i] + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, angles[i] + beat8(speed));
   }
 }
 
@@ -1094,7 +1024,7 @@ void risingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 - beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 - beat8(speed));
   }
 }
 
@@ -1102,7 +1032,7 @@ void fallingPalette()
 {
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 + beat8(30));
+    leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 + beat8(speed));
   }
 }
 
@@ -1138,15 +1068,14 @@ void sinelon()
 {
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16(30, 0, NUM_LEDS);
+  int pos = beatsin16(speed, 0, NUM_LEDS);
   leds[pos] += CHSV( gHue, 255, 192);
 }
 
 void bpm()
 {
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)  
+  uint8_t beat = beatsin8( speed, 64, 255);
   for ( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette(gCurrentPalette, gHue + (i * 2), beat - gHue + (i * 10));
   }
