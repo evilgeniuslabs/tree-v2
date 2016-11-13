@@ -39,6 +39,8 @@ $(document).ready(function() {
         } else if (field.type == "Color") {
           addColorFieldPicker(field);
           addColorFieldButtons(field);
+        } else if (field.type == "Section") {
+          addSectionField(field);
         }
       });
 
@@ -209,6 +211,15 @@ function addColorFieldButtons(field) {
       ignoreColorChange = false;
     });
   });
+
+  $("#form").append(template);
+}
+
+function addSectionField(field) {
+  var template = $("#sectionTemplate").clone();
+
+  template.attr("id", "form-group-section-" + field.name);
+  template.attr("data-field-type", field.type);
 
   $("#form").append(template);
 }
