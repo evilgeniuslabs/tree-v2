@@ -1,16 +1,23 @@
 #!/bin/bash
 # upload the web app to the board
 
-url=${1:-"http://192.168.1.13/edit"}
-gzip -rkf data
+ip=${1:-"192.168.1.13"}
+url="http://$ip/edit"
 
-# add --trace-ascii curl.log for logging
+declare -a filenames=("css/styles.css"
+                     "js/app.js"
+                     "index.htm"
+                     "images/atom196.png"
+                     "favicon.ico")
 
-curl -v --form "file=@data/css/styles.css.gz;filename=css/styles.css.gz" $url
-curl -v --form "file=@data/js/app.js.gz;filename=js/app.js.gz" $url
-curl -v --form "file=@data/index.htm.gz;filename=index.htm.gz" $url
-curl -v --form "file=@data/images/atom196.png.gz;filename=images/atom196.png.gz" $url
-curl -v --form "file=@data/favicon.ico.gz;filename=favicon.ico.gz" $url
+for filename in "${filenames[@]}"
+do
+  # add --trace-ascii curl.log for logging
 
-# remove all of the gz files
-find . -name "*.gz" -type f -delete
+  gzip -kf data/$filename
+
+  echo $filename
+  curl --form "file=@data/$filename.gz;filename=$filename.gz" $url
+
+  rm -f data/$filename.gz
+done
