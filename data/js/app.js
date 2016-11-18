@@ -260,7 +260,9 @@ function setBooleanFieldValue(field, btnOn, btnOff, value) {
 function postValue(name, value) {
   $("#status").html("Setting " + name + ": " + value + ", please wait...");
 
-  $.post(urlBase + name + "?value=" + value, function(data) {
+  var body = { name: name, value: value };
+
+  $.post(urlBase + name + "?value=" + value, body, function(data) {
     if (data.name != null) {
       $("#status").html("Set " + name + ": " + data.name);
     } else {
@@ -279,9 +281,12 @@ function delayPostValue(name, value) {
 function postColor(name, value) {
   $("#status").html("Setting " + name + ": " + value.r + "," + value.g + "," + value.b + ", please wait...");
 
-  $.post(urlBase + name + "?r=" + value.r + "&g=" + value.g + "&b=" + value.b, function(data) {
-    $("#status").html("Set " + name + ": " + value.r + "," + value.g + "," + value.b);
-  });
+  var body = { name: name, r: value.r, g: value.g, b: value.b };
+
+  $.post(urlBase + name + "?r=" + value.r + "&g=" + value.g + "&b=" + value.b, body, function(data) {
+    $("#status").html("Set " + name + ": " + data);
+  })
+  .fail(function(textStatus, errorThrown) { $("#status").html("Fail: " + textStatus + " " + errorThrown); });
 }
 
 function delayPostColor(name, value) {

@@ -416,7 +416,7 @@ void sendInt(uint8_t value)
 
 void sendString(String value)
 {
-  webServer.send(200, "text/json", value);
+  webServer.send(200, "text/plain", value);
 }
 
 void broadcastInt(String name, uint8_t value)
