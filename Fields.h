@@ -64,8 +64,6 @@ String getSpeed() {
   return String(speed);
 }
 
-uint8_t fieldCount = 9;
-
 FieldList fields = {
   { "power", "Power", BooleanFieldType, getPower },
   { "brightness", "Brightness", NumberFieldType, getBrightness },
@@ -81,28 +79,4 @@ FieldList fields = {
   { "sparking", "Sparking", NumberFieldType, getSparking },
 };
 
-/*
-  String json = "[";
-
-  json += "{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":" + String(power) + "},";
-  json += "{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":" + String(brightness) + "},";
-
-  json += "{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":" + String(currentPatternIndex) + ",\"options\":[";
-  for (uint8_t i = 0; i < patternCount; i++)
-  {
-    json += "\"" + patterns[i].name + "\"";
-    if (i < patternCount - 1)
-      json += ",";
-  }
-  json += "]},";
-
-  json += "{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":" + String(autoplay) + "},";
-  json += "{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":" + String(autoplayDuration) + "},";
-
-  json += "{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"" + String(solidColor.r) + "," + String(solidColor.g) + "," + String(solidColor.b) +"\"},";
-
-  json += "{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":" + String(cooling) + "},";
-  json += "{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":" + String(sparking) + "}";
-
-  json += "]";
-*/
+uint8_t fieldCount = ARRAY_SIZE(fields);
