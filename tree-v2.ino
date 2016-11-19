@@ -156,6 +156,7 @@ typedef struct {
 typedef PatternAndName PatternAndNameList[];
 
 #include "Twinkles.h"
+#include "TwinkleFOX.h"
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
@@ -191,6 +192,22 @@ PatternAndNameList patterns = {
   { snowTwinkles,           "Snow Twinkles" },
   { cloudTwinkles,          "Cloud Twinkles" },
   { incandescentTwinkles,   "Incandescent Twinkles" },
+
+  { retroC9Twinkles,        "Retro C9 Twinkles" },
+  { redWhiteTwinkles,       "Red & White Twinkles" },
+  { blueWhiteTwinkles,      "Blue & White Twinkles" },
+  { redGreenWhiteTwinkles,  "Red, Green & White Twinkles" },
+  { fairyLightTwinkles,     "Fairy Light Twinkles" },
+  { snow2Twinkles,          "Snow 2 Twinkles" },
+  { hollyTwinkles,          "Holly Twinkles" },
+  { iceTwinkles,            "Ice Twinkles" },
+  { partyTwinkles,          "Party Twinkles" },
+  { forestTwinkles,         "Forest Twinkles" },
+  { lavaTwinkles,           "Lava Twinkles" },
+  { fireTwinkles,           "Fire Twinkles" },
+  { cloud2Twinkles,         "Cloud 2 Twinkles" },
+  { oceanTwinkles,          "Ocean Twinkles" },
+  
   { rainbow,                "Rainbow" },
   { rainbowWithGlitter,     "Rainbow With Glitter" },
   { rainbowSolid,           "Solid Rainbow" },
@@ -1069,7 +1086,13 @@ void sinelon()
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy( leds, NUM_LEDS, 20);
   int pos = beatsin16(speed, 0, NUM_LEDS);
-  leds[pos] += CHSV( gHue, 255, 192);
+  static int prevpos = 0;
+  if( pos < prevpos ) { 
+    fill_solid( leds+pos, (prevpos-pos)+1, CHSV(gHue,220,255));
+  } else { 
+    fill_solid( leds+prevpos, (pos-prevpos)+1, CHSV( gHue,220,255));
+  }
+  prevpos = pos;
 }
 
 void bpm()
