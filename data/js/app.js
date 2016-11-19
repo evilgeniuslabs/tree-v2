@@ -69,29 +69,38 @@ function addNumberField(field) {
   label.attr("for", "input-" + field.name);
   label.text(field.label);
 
-  var addon = template.find(".input-group-addon");
-  addon.text(field.value);
-
-  var input = template.find(".form-control");
-  input.attr("id", "input-" + field.name);
+  var input = template.find(".input");
+  var slider = template.find(".slider");
+  slider.attr("id", "input-" + field.name);
   if (field.min) {
     input.attr("min", field.min);
+    slider.attr("min", field.min);
   }
   if (field.max) {
     input.attr("max", field.max);
+    slider.attr("max", field.max);
   }
   if (field.step) {
     input.attr("step", field.step);
+    slider.attr("step", field.step);
   }
   input.val(field.value);
+  slider.val(field.value);
 
-  input.on("change mousemove", function() {
-    addon.text($(this).val());
+  slider.on("change mousemove", function() {
+    input.val($(this).val());
+  });
+
+  slider.on("change", function() {
+    var value = $(this).val();
+    input.val(value);
+    field.value = value;
+    delayPostValue(field.name, value);
   });
 
   input.on("change", function() {
     var value = $(this).val();
-    addon.text(value);
+    slider.val(value);
     field.value = value;
     delayPostValue(field.name, value);
   });

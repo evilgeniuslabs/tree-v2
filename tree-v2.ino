@@ -65,7 +65,7 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #define COLOR_ORDER   RGB
 #define NUM_LEDS      250
 
-#define MILLI_AMPS         10000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         5000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  240 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 #include "Map.h"
