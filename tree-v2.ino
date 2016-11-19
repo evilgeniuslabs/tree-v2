@@ -157,6 +157,7 @@ typedef PatternAndName PatternAndNameList[];
 
 #include "Twinkles.h"
 #include "TwinkleFOX.h"
+#include "Noise.h"
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
@@ -188,11 +189,13 @@ PatternAndNameList patterns = {
   { fallingPalette,         "Falling Palette" },
   { risingPalette,          "Rising Palette" },
 
+  // twinkle patterns
   { rainbowTwinkles,        "Rainbow Twinkles" },
   { snowTwinkles,           "Snow Twinkles" },
   { cloudTwinkles,          "Cloud Twinkles" },
   { incandescentTwinkles,   "Incandescent Twinkles" },
 
+  // TwinkleFOX patterns
   { retroC9Twinkles,        "Retro C9 Twinkles" },
   { redWhiteTwinkles,       "Red & White Twinkles" },
   { blueWhiteTwinkles,      "Blue & White Twinkles" },
@@ -209,6 +212,19 @@ PatternAndNameList patterns = {
   { oceanTwinkles,          "Ocean Twinkles" },
 
   { candyCane,              "Candy Cane" },
+
+  // noise patterns
+  { fireNoise, "Fire Noise" },
+  { fireNoise2, "Fire Noise 2" },
+  { lavaNoise, "Lava Noise" },
+  { rainbowNoise, "Rainbow Noise" },
+  { rainbowStripeNoise, "Rainbow Stripe Noise" },
+  { partyNoise, "Party Noise" },
+  { forestNoise, "Forest Noise" },
+  { cloudNoise, "Cloud Noise" },
+  { oceanNoise, "Ocean Noise" },
+  { blackAndWhiteNoise, "Black & White Noise" },
+  { blackAndBlueNoise, "Black & Blue Noise" },
   
   { rainbow,                "Rainbow" },
   { rainbowWithGlitter,     "Rainbow With Glitter" },
@@ -1292,7 +1308,7 @@ void heatMap(CRGBPalette16 palette, bool up)
   for ( uint16_t j = 0; j < NUM_LEDS; j++) {
     // Scale the heat value from 0-255 down to 0-240
     // for best results with color palettes.
-    colorindex = scale8(heat[j], 240);
+    colorindex = scale8(heat[j], 190);
 
     CRGB color = ColorFromPalette(palette, colorindex);
 
