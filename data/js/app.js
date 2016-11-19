@@ -181,20 +181,69 @@ function addColorFieldPicker(field) {
 
   var id = "input-" + field.name;
 
-  var label = template.find(".control-label");
+  var label = template.find(".color-label");
   label.attr("for", id);
   label.text(field.label);
 
-  var input = template.find(".form-control");
+  var input = template.find(".minicolors");
   input.attr("id", id);
 
-  input.val("rgb(" + field.value + ")");
+  if(!field.value.startsWith("rgb("))
+    field.value = "rgb(" + field.value;
+
+  if(!field.value.endsWith(")"))
+    field.value += ")";
+
+  input.val(field.value);
+
+  var components = rgbToComponents(field.value);
+
+  var red = template.find(".color-red");
+  var green = template.find(".color-green");
+  var blue = template.find(".color-blue");
+
+  red.attr("id", id + "-red");
+  green.attr("id", id + "-green");
+  blue.attr("id", id + "-blue");
+
+  red.val(components.r);
+  green.val(components.g);
+  blue.val(components.b);
+
+  red.on("change", function() {
+    var value = $("#" + id).val();
+    var r = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = r + "," + components.g + "," + components.b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+  });
+
+  green.on("change", function() {
+    var value = $("#" + id).val();
+    var g = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = components.r + "," + g + "," + components.b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+  });
+
+  blue.on("change", function() {
+    var value = $("#" + id).val();
+    var b = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = components.r + "," + components.g + "," + b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+  });
 
   input.on("change", function() {
     if (ignoreColorChange) return;
 
     var value = $(this).val();
     var components = rgbToComponents(value);
+
+    red.val(components.r);
+    green.val(components.g);
+    blue.val(components.b);
+
     field.value = components.r + "," + components.g + "," + components.b;
     delayPostColor(field.name, components);
   });
@@ -216,7 +265,11 @@ function addColorFieldButtons(field) {
       postColor(field.name, components);
 
       ignoreColorChange = true;
-      $("#input-" + field.name).minicolors("value", "rgb(" + field.value + ")");
+      var id = "#input-" + field.name;
+      $(id).minicolors("value", "rgb(" + field.value + ")");
+      $(id + "-red").val(components.r);
+      $(id + "-green").val(components.g);
+      $(id + "-blue").val(components.b);
       ignoreColorChange = false;
     });
   });

@@ -6,9 +6,10 @@ url="http://$ip/edit"
 
 declare -a filenames=("css/styles.css"
                      "js/app.js"
-                     "index.htm"
-                     "images/atom196.png"
-                     "favicon.ico")
+                     "index.htm")
+
+# "images/atom196.png"
+# "favicon.ico"
 
 for filename in "${filenames[@]}"
 do

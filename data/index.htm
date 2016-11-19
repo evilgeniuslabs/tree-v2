@@ -96,9 +96,33 @@
     </div>
 
     <div id="colorTemplate1" class="form-group">
-      <label class="col-sm-2 control-label"></label>
+      <label class="col-sm-2 control-label color-label"></label>
       <div class="col-sm-6">
-        <input type="text" class="form-control minicolors" />
+        <div class="row">
+          <div class="col-sm-6">
+            <input type="text" class="form-control minicolors" />
+          </div>
+          <div class="col-sm-6">
+            <div class="row color-component-row">
+              <label class="col-sm-3 control-label color-component-label">Red</label>
+              <div class="col-sm-9">
+                <input class="form-control color-red" type="number" step="1" min="0" max="255" />
+              </div>
+            </div>
+            <div class="row color-component-row">
+              <label class="col-sm-3 control-label color-component-label">Green</label>
+              <div class="col-sm-9">
+                <input class="form-control color-green" type="number" step="1" min="0" max="255" />
+              </div>
+            </div>
+            <div class="row color-component-row">
+              <label class="col-sm-3 control-label color-component-label">Blue</label>
+              <div class="col-sm-9">
+                <input class="form-control color-blue" type="number" step="1" min="0" max="255" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
