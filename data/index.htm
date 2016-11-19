@@ -25,7 +25,7 @@
   <nav class="navbar navbar-default navbar-static-top" id="top" role="banner">
     <div class="container">
       <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -33,11 +33,18 @@
         </button>
         <a class="navbar-brand" href="https://www.evilgeniuslabs.org" target="_blank">Evil Genius Labs</a>
       </div>
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <div class="collapse navbar-collapse" id="navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li class="active"><a href="/">Tree v2 <span class="sr-only">(current)</span></a></li>
-          <li><a href="/edit.htm" target="_blank">Edit</a></li>
-          <li><a href="/update" target="_blank">Update</a></li>
+          <li><a href="/edit.htm" target="_blank" title="Edit Files">Files</a></li>
+          <li><a href="/update" target="_blank" title="Update Firmware">Firmware</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="https://github.com/evilgeniuslabs/tree-v2" title="Tree v2 on GitHub" target="_blank">
+              <img style="height: 16px;" src="https://assets-cdn.github.com/favicon.ico">
+            </a>
+          </li>
         </ul>
       </div>
     </div>
@@ -46,18 +53,18 @@
   <div id="container" class="container">
 
     <form class="form-horizontal" id="form">
-      <div class="form-group">
+      <!-- <div class="form-group">
         <div class="col-sm-1 col-sm-offset-2">
-          <button type="button" class="btn btn-default" aria-label="Refresh" title="Refresh">
+          <a href="/" class="btn btn-default" aria-label="Refresh" title="Refresh">
             <span class="glyphicon glyphicon-refresh" id="btnRefresh"></span>
-          </button>
+          </a>
         </div>
         <div class="col-sm-9">
           <p id="status" class="form-control-static">Loading, please wait...</p>
         </div>
-      </div>
-
+      </div> -->
     </form>
+
   </div>
 
   <div id="templates" style="display: none">
@@ -191,6 +198,29 @@
     </div>
 
   </div>
+
+  <nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-2" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="navbar-collapse-2">
+        <ul class="nav navbar-nav">
+          <li>
+            <a href="/" aria-label="Refresh" title="Refresh">
+              <span class="glyphicon glyphicon-refresh" id="btnRefresh"></span>
+            </a>
+          </li>
+          <li><p class="navbar-text" id="status">Loading, please wait...</p></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
   <!-- request js from internet CDN -->
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
