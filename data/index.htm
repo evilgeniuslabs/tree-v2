@@ -48,7 +48,7 @@
     <form class="form-horizontal" id="form">
       <div class="form-group">
         <div class="col-sm-1 col-sm-offset-2">
-          <button type="button" class="btn btn-default">
+          <button type="button" class="btn btn-default" aria-label="Refresh" title="Refresh">
             <span class="glyphicon glyphicon-refresh" id="btnRefresh"></span>
           </button>
         </div>
@@ -63,24 +63,24 @@
   <div id="templates" style="display: none">
 
     <div id="sectionTemplate" class="form-group">
-        <div class="col-sm-8">
-          <hr style="margin-bottom: 5px;margin-top: 5px;" />
-        </div>
+      <div class="col-sm-12">
+        <hr style="margin-bottom: 5px;margin-top: 5px;" />
+      </div>
     </div>
 
     <div id="numberTemplate" class="form-group">
       <label class="col-sm-2 control-label"></label>
-      <div class="col-sm-4">
-        <input class="form-control slider" type="range" step="1" min="0" max="255" />
-      </div>
       <div class="col-sm-2">
         <input class="form-control input" type="number" step="1" min="0" max="255" />
+      </div>
+      <div class="col-sm-8">
+        <input class="form-control slider" type="range" step="1" min="0" max="255" />
       </div>
     </div>
 
     <div id="booleanTemplate" class="form-group">
       <label class="col-sm-2 control-label"></label>
-      <div class="col-sm-6">
+      <div class="col-sm-10">
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-default" id="btnOn">On</button>
           <button type="button" class="btn btn-default" id="btnOff">Off</button>
@@ -90,44 +90,26 @@
 
     <div id="selectTemplate" class="form-group">
       <label class="col-sm-2 control-label"></label>
-      <div class="col-sm-6">
+      <div class="col-sm-8">
         <select class="form-control"><select>
       </div>
-    </div>
-
-    <div id="colorTemplate1" class="form-group">
-      <label class="col-sm-2 control-label color-label"></label>
-      <div class="col-sm-6">
-        <div class="row">
-          <div class="col-sm-6">
-            <input type="text" class="form-control minicolors" />
-          </div>
-          <div class="col-sm-6">
-            <div class="row color-component-row">
-              <label class="col-sm-3 control-label color-component-label">Red</label>
-              <div class="col-sm-9">
-                <input class="form-control color-red" type="number" step="1" min="0" max="255" />
-              </div>
-            </div>
-            <div class="row color-component-row">
-              <label class="col-sm-3 control-label color-component-label">Green</label>
-              <div class="col-sm-9">
-                <input class="form-control color-green" type="number" step="1" min="0" max="255" />
-              </div>
-            </div>
-            <div class="row color-component-row">
-              <label class="col-sm-3 control-label color-component-label">Blue</label>
-              <div class="col-sm-9">
-                <input class="form-control color-blue" type="number" step="1" min="0" max="255" />
-              </div>
-            </div>
-          </div>
+      <div class="col-sm-2">
+        <div class="btn-group" role="group" aria-label="...">
+          <button type="button" class="btn btn-default btn-previous"
+                  aria-label="Previous" title="Previous">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+          </button>
+          <button type="button" class="btn btn-default btn-next"
+                  aria-label="Next" title="Next">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+          </button>
         </div>
       </div>
     </div>
 
-    <div id="colorTemplate2" class="form-group">
-      <div class="col-sm-6 col-sm-offset-2">
+    <div id="colorPaletteTemplate" class="form-group">
+      <label class="col-sm-2 control-label color-label"></label>
+      <div class="col-sm-10">
         <div class="btn-group btn-group-justified" role="group">
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-default btn-color" style="background: #FF0000;" title="Red">&nbsp;</button>
@@ -168,6 +150,42 @@
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-default btn-color" style="background: #FFFFFF;" title="White">&nbsp;</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="colorTemplate">
+      <div class="form-group">
+        <!-- <label class="col-sm-2 control-label color-label"></label> -->
+        <div class="col-sm-12 col-sm-offset-2">
+          <input type="text" class="form-control minicolors" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Red</label>
+        <div class="col-sm-2">
+          <input class="form-control color-red-input" type="number" step="1" min="0" max="255" />
+        </div>
+        <div class="col-sm-8">
+          <input class="form-control color-red-slider" type="range" step="1" min="0" max="255" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Green</label>
+        <div class="col-sm-2">
+          <input class="form-control color-green-input" type="number" step="1" min="0" max="255" />
+        </div>
+        <div class="col-sm-8">
+          <input class="form-control color-green-slider" type="range" step="1" min="0" max="255" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Blue</label>
+        <div class="col-sm-2">
+          <input class="form-control color-blue-input" type="number" step="1" min="0" max="255" />
+        </div>
+        <div class="col-sm-8">
+          <input class="form-control color-blue-slider" type="range" step="1" min="0" max="255" />
         </div>
       </div>
     </div>

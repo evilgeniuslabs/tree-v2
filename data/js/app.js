@@ -37,8 +37,8 @@ $(document).ready(function() {
         } else if (field.type == "Select") {
           addSelectField(field);
         } else if (field.type == "Color") {
+          addColorFieldPalette(field);
           addColorFieldPicker(field);
-          addColorFieldButtons(field);
         } else if (field.type == "Section") {
           addSectionField(field);
         }
@@ -170,20 +170,39 @@ function addSelectField(field) {
     postValue(field.name, value);
   });
 
+  var previousButton = template.find(".btn-previous");
+  var nextButton = template.find(".btn-next");
+
+  previousButton.click(function() {
+    var value = template.find("#" + id + " option:selected").index();
+    var count = select.find("option").length;
+    value--;
+    if(value < 0)
+      value = count - 1;
+    select.val(value);
+    postValue(field.name, value);
+  });
+
+  nextButton.click(function() {
+    var value = template.find("#" + id + " option:selected").index();
+    var count = select.find("option").length;
+    value++;
+    if(value >= count)
+      value = 0;
+    select.val(value);
+    postValue(field.name, value);
+  });
+
   $("#form").append(template);
 }
 
 function addColorFieldPicker(field) {
-  var template = $("#colorTemplate1").clone();
+  var template = $("#colorTemplate").clone();
 
   template.attr("id", "form-group-" + field.name);
   template.attr("data-field-type", field.type);
 
   var id = "input-" + field.name;
-
-  var label = template.find(".color-label");
-  label.attr("for", id);
-  label.text(field.label);
 
   var input = template.find(".minicolors");
   input.attr("id", id);
@@ -198,40 +217,94 @@ function addColorFieldPicker(field) {
 
   var components = rgbToComponents(field.value);
 
-  var red = template.find(".color-red");
-  var green = template.find(".color-green");
-  var blue = template.find(".color-blue");
+  var redInput = template.find(".color-red-input");
+  var greenInput = template.find(".color-green-input");
+  var blueInput = template.find(".color-blue-input");
 
-  red.attr("id", id + "-red");
-  green.attr("id", id + "-green");
-  blue.attr("id", id + "-blue");
+  var redSlider = template.find(".color-red-slider");
+  var greenSlider = template.find(".color-green-slider");
+  var blueSlider = template.find(".color-blue-slider");
 
-  red.val(components.r);
-  green.val(components.g);
-  blue.val(components.b);
+  redInput.attr("id", id + "-red");
+  greenInput.attr("id", id + "-green");
+  blueInput.attr("id", id + "-blue");
 
-  red.on("change", function() {
+  redSlider.attr("id", id + "-red-slider");
+  greenSlider.attr("id", id + "-green-slider");
+  blueSlider.attr("id", id + "-blue-slider");
+
+  redInput.val(components.r);
+  greenInput.val(components.g);
+  blueInput.val(components.b);
+
+  redSlider.val(components.r);
+  greenSlider.val(components.g);
+  blueSlider.val(components.b);
+
+  redInput.on("change", function() {
     var value = $("#" + id).val();
     var r = $(this).val();
     var components = rgbToComponents(value);
     field.value = r + "," + components.g + "," + components.b;
     $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    redSlider.val(r);
   });
 
-  green.on("change", function() {
+  greenInput.on("change", function() {
     var value = $("#" + id).val();
     var g = $(this).val();
     var components = rgbToComponents(value);
     field.value = components.r + "," + g + "," + components.b;
     $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    greenSlider.val(g);
   });
 
-  blue.on("change", function() {
+  blueInput.on("change", function() {
     var value = $("#" + id).val();
     var b = $(this).val();
     var components = rgbToComponents(value);
     field.value = components.r + "," + components.g + "," + b;
     $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    blueSlider.val(b);
+  });
+
+  redSlider.on("change", function() {
+    var value = $("#" + id).val();
+    var r = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = r + "," + components.g + "," + components.b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    redInput.val(r);
+  });
+
+  greenSlider.on("change", function() {
+    var value = $("#" + id).val();
+    var g = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = components.r + "," + g + "," + components.b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    greenInput.val(g);
+  });
+
+  blueSlider.on("change", function() {
+    var value = $("#" + id).val();
+    var b = $(this).val();
+    var components = rgbToComponents(value);
+    field.value = components.r + "," + components.g + "," + b;
+    $("#" + id).minicolors("value", "rgb(" + field.value + ")");
+    blueInput.val(b);
+  });
+
+  redSlider.on("change mousemove", function() {
+    redInput.val($(this).val());
+  });
+
+  greenSlider.on("change mousemove", function() {
+    greenInput.val($(this).val());
+  });
+
+  blueSlider.on("change mousemove", function() {
+    blueInput.val($(this).val());
   });
 
   input.on("change", function() {
@@ -240,9 +313,13 @@ function addColorFieldPicker(field) {
     var value = $(this).val();
     var components = rgbToComponents(value);
 
-    red.val(components.r);
-    green.val(components.g);
-    blue.val(components.b);
+    redInput.val(components.r);
+    greenInput.val(components.g);
+    blueInput.val(components.b);
+
+    redSlider.val(components.r);
+    greenSlider.val(components.g);
+    blueSlider.val(components.b);
 
     field.value = components.r + "," + components.g + "," + components.b;
     delayPostColor(field.name, components);
@@ -251,10 +328,13 @@ function addColorFieldPicker(field) {
   $("#form").append(template);
 }
 
-function addColorFieldButtons(field) {
-  var template = $("#colorTemplate2").clone();
+function addColorFieldPalette(field) {
+  var template = $("#colorPaletteTemplate").clone();
 
   var buttons = template.find(".btn-color");
+
+  var label = template.find(".control-label");
+  label.text(field.label);
 
   buttons.each(function(index, button) {
     $(button).click(function() {
@@ -270,6 +350,9 @@ function addColorFieldButtons(field) {
       $(id + "-red").val(components.r);
       $(id + "-green").val(components.g);
       $(id + "-blue").val(components.b);
+      $(id + "-red-slider").val(components.r);
+      $(id + "-green-slider").val(components.g);
+      $(id + "-blue-slider").val(components.b);
       ignoreColorChange = false;
     });
   });
