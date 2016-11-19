@@ -118,26 +118,26 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 CRGB solidColor = CRGB::Blue;
 
-uint8_t paletteIndex = 0;
-
-// List of palettes to cycle through.
-CRGBPalette16 palettes[] =
-{
-  RainbowColors_p,
-  /*RainbowStripeColors_p,*/
-  CloudColors_p,
-  OceanColors_p,
-  ForestColors_p,
-  HeatColors_p,
-  LavaColors_p,
-  PartyColors_p,
-  IceColors_p,
-};
-
-uint8_t paletteCount = ARRAY_SIZE(palettes);
-
-CRGBPalette16 currentPalette(CRGB::Black);
-CRGBPalette16 targetPalette = palettes[paletteIndex];
+//uint8_t paletteIndex = 0;
+//
+//// List of palettes to cycle through.
+//CRGBPalette16 palettes[] =
+//{
+//  RainbowColors_p,
+//  /*RainbowStripeColors_p,*/
+//  CloudColors_p,
+//  OceanColors_p,
+//  ForestColors_p,
+//  HeatColors_p,
+//  LavaColors_p,
+//  PartyColors_p,
+//  IceColors_p,
+//};
+//
+//uint8_t paletteCount = ARRAY_SIZE(palettes);
+//
+//CRGBPalette16 currentPalette(CRGB::Black);
+//CRGBPalette16 targetPalette = palettes[paletteIndex];
 
 // scale the brightness of all pixels down
 void dimAll(byte value)
@@ -207,6 +207,8 @@ PatternAndNameList patterns = {
   { fireTwinkles,           "Fire Twinkles" },
   { cloud2Twinkles,         "Cloud 2 Twinkles" },
   { oceanTwinkles,          "Ocean Twinkles" },
+
+  { candyCane,              "Candy Cane" },
   
   { rainbow,                "Rainbow" },
   { rainbowWithGlitter,     "Rainbow With Glitter" },
@@ -471,16 +473,16 @@ void loop() {
   // change to a new cpt-city gradient palette
   EVERY_N_SECONDS( secondsPerPalette ) {
     gCurrentPaletteNumber = addmod8( gCurrentPaletteNumber, 1, gGradientPaletteCount);
-    gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
+//    gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
 
-    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
-    targetPalette = palettes[paletteIndex];
+//    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
+//    targetPalette = palettes[paletteIndex];
   }
 
   EVERY_N_MILLISECONDS(40) {
     // slowly blend the current palette to the next
     nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 16);
-    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
+//    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
 
@@ -504,15 +506,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_DISCONNECTED:
       Serial.printf("[%u] Disconnected!\n", num);
       break;
+      
     case WStype_CONNECTED:
       {
         IPAddress ip = webSocketsServer.remoteIP(num);
         Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
 
         // send message to client
-        //        webSocketsServer.sendTXT(num, "Connected");
+        // webSocketsServer.sendTXT(num, "Connected");
       }
       break;
+      
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
@@ -522,6 +526,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       // send data to all connected clients
       // webSocketsServer.broadcastTXT("message here");
       break;
+      
     case WStype_BIN:
       Serial.printf("[%u] get binary length: %u\n", num, length);
       hexdump(payload, length);
@@ -1042,6 +1047,13 @@ void risingPalette()
   for (uint8_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 - beat8(speed));
+  }
+}
+
+void candyCane() {
+  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  {
+    leds[i] = ColorFromPalette(RedWhite_p, zCoords[i] - beat8(speed));
   }
 }
 
