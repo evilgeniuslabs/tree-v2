@@ -1,6 +1,9 @@
 #!/bin/bash
 # upload the web app to the board
 
+# investigate using a single file to bring in the defaults
+# ip=$(< ip.txt)
+
 ip=${1:-"192.168.1.13"}
 url="http://$ip/edit"
 
