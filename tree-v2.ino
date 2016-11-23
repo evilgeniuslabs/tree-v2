@@ -399,6 +399,12 @@ void setup() {
     sendInt(currentPatternIndex);
   });
 
+  webServer.on("/patternName", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    setPatternName(value);
+    sendInt(currentPatternIndex);
+  });
+
   webServer.on("/brightness", HTTP_POST, []() {
     String value = webServer.arg("value");
     setBrightness(value.toInt());
@@ -871,6 +877,16 @@ void setPattern(uint8_t value)
   EEPROM.commit();
 
   broadcastInt("pattern", currentPatternIndex);
+}
+
+void setPatternName(String name)
+{
+  for(uint8_t i = 0; i < patternCount; i++) {
+    if(patterns[i].name == name) {
+      setPattern(i);
+      break;
+    }
+  }
 }
 
 void adjustBrightness(bool up)

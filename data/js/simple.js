@@ -40,52 +40,49 @@ var colors = [
 ];
 
 var patterns = [
-  { index: 0, name: "Pride" },
-  { index: 1, name: "Pride 2" },
+  "Pride",
+  "Pride 2",
 
-  { index: 2, name: "Color Waves" },
-  { index: 3, name: "Color Waves 2" },
+  "Color Waves",
+  "Color Waves 2",
 
-  { index: 15, name: "Falling Rainbow" },
-  { index: 16, name: "Rising Rainbow" },
+  "Falling Rainbow",
+  "Rising Rainbow",
 
-  { index: 20, name: "Falling Palette" },
-  { index: 21, name: "Rising Palette" },
+  "Falling Palette",
+  "Rising Palette",
 
-  // twinkle patterns
-  { index: 22, name: "Rainbow Twinkles" },
-  { index: 23, name: "Snow Twinkles" },
-  { index: 24, name: "Cloud Twinkles" },
-  { index: 25, name: "Incandescent Twinkles" },
+  "Rainbow Twinkles",
+  "Snow Twinkles",
+  "Cloud Twinkles",
+  "Incandescent Twinkles",
 
-  // TwinkleFOX patterns
-  { index: 26, name: "Retro C9 Twinkles" },
-  { index: 27, name: "Red & White Twinkles" },
-  { index: 28, name: "Blue & White Twinkles" },
-  { index: 29, name: "Red, Green & White Twinkles" },
-  { index: 30, name: "Fairy Light Twinkles" },
-  { index: 31, name: "Snow 2 Twinkles" },
-  { index: 32, name: "Holly Twinkles" },
-  { index: 33, name: "Ice Twinkles" },
-  { index: 34, name: "Party Twinkles" },
-  { index: 35, name: "Forest Twinkles" },
-  { index: 36, name: "Lava Twinkles" },
-  { index: 37, name: "Fire Twinkles" },
-  { index: 38, name: "Cloud 2 Twinkles" },
-  { index: 39, name: "Ocean Twinkles" },
+  "Retro C9 Twinkles",
+  "Red & White Twinkles",
+  "Blue & White Twinkles",
+  "Red, Green & White Twinkles",
+  "Fairy Light Twinkles",
+  "Snow 2 Twinkles",
+  "Holly Twinkles",
+  "Ice Twinkles",
+  "Party Twinkles",
+  "Forest Twinkles",
+  "Lava Twinkles",
+  "Fire Twinkles",
+  "Cloud 2 Twinkles",
+  "Ocean Twinkles",
 
-  { index: 40, name: "Candy Cane" },
+  "Candy Cane",
 
-  { index: 52, name: "Rainbow" },
-  { index: 53, name: "Rainbow With Glitter" },
-  { index: 54, name: "Solid Rainbow" },
-  { index: 55, name: "Confetti" },
-  { index: 56, name: "Sinelon" },
-  { index: 57, name: "Beat" },
-  { index: 58, name: "Juggle" },
-  { index: 59, name: "Fire" },
-  { index: 60, name: "Water" },
-
+  "Rainbow",
+  "Rainbow With Glitter",
+  "Solid Rainbow",
+  "Confetti",
+  "Sinelon",
+  "Beat",
+  "Juggle",
+  "Fire",
+  "Water",
 ];
 
 $(document).ready(function() {
@@ -130,10 +127,10 @@ function addPatternButtons() {
 
     var button = template.find(".btn-pattern");
 
-    button.text(pattern.name);
+    button.text(pattern);
 
     button.click(function() {
-      postValue("pattern", pattern.index);
+      postValue("patternName", pattern);
     });
 
     $("#patternGrid").append(template);
@@ -145,7 +142,7 @@ function postValue(name, value) {
 
   var body = { name: name, value: value };
 
-  $.post(urlBase + name + "?value=" + value, body, function(data) {
+  $.post(urlBase + name, body, function(data) {
     if (data.name != null) {
       $("#status").html("Set " + name + ": " + data.name);
     } else {
