@@ -22,47 +22,27 @@
 
   <div id="container" class="container">
 
-    <div id="colorButtonsRow" class="grid">
+    <div style="margin: 5px;">
+      <button type="button" class="btn btn-default" id="btnOn">On</button>
+      <button type="button" class="btn btn-default" id="btnOff">Off</button>
+    </div>
+
+    <div id="colorButtonsRow" class="grid-color">
 
     </div>
 
-    <div id="patternGrid" class="grid">
+    <div id="patternGrid" class="grid-pattern">
     </div>
 
   </div>
 
   <div id="templates" style="display: none">
 
-    <div id="colorButtonTemplate" class="grid-item">
-      <div class="thumbnail btn-color" style="cursor: pointer">&nbsp;</div>
-    </div>
+    <div id="colorButtonTemplate" class="grid-item-color"></div>
 
-    <div id="patternButtonTemplate" class="grid-item grid-item--width2">
-      <button class="btn btn-default btn-pattern">
-      </button>
-    </div>
+    <button id="patternButtonTemplate" class="grid-item-pattern btn btn-default"></button>
 
   </div>
-
-  <nav class="navbar navbar-default navbar-fixed-bottom">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-2" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-      </div>
-      <div class="collapse navbar-collapse" id="navbar-collapse-2">
-        <ul class="nav navbar-nav">
-          <li>
-            <p class="navbar-text" id="status">Loading, please wait...</p>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
 
   <!-- request js from internet CDN -->
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>

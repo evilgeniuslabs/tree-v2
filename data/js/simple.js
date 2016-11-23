@@ -11,34 +11,6 @@ var postValueTimer = {};
 
 var ignoreColorChange = false;
 
-var colors = [
-  "#ff0000",
-  "#ff4000",
-  "#ff8000",
-  "#ffbf00",
-  "#ffff00",
-  "#bfff00",
-  "#80ff00",
-  "#40ff00",
-  "#00ff00",
-  "#00ff40",
-  "#00ff80",
-  "#00ffbf",
-  "#00ffff",
-  "#00bfff",
-  "#0080ff",
-  "#0040ff",
-  "#0000ff",
-  "#4000ff",
-  "#8000ff",
-  "#bf00ff",
-  "#ff00ff",
-  "#ff00bf",
-  "#ff0080",
-  "#ff0040",
-  "#ff0000"
-];
-
 var patterns = [
   "Pride",
   "Pride 2",
@@ -82,7 +54,7 @@ var patterns = [
   "Beat",
   "Juggle",
   "Fire",
-  "Water",
+  "Water"
 ];
 
 $(document).ready(function() {
@@ -91,50 +63,80 @@ $(document).ready(function() {
   addColorButtons();
   addPatternButtons();
 
-  $('.grid').isotope({
-    itemSelector: '.grid-item',
-    layoutMode: 'fitRows'
+  $("#btnOn").click(function() {
+    postValue("power", 1);
+    $("#btnOn").attr("class", "btn btn-primary");
+    $("#btnOff").attr("class", "btn btn-default");
+  });
+
+  $("#btnOff").click(function() {
+    postValue("power", 0);
+    $("#btnOff").attr("class", "btn btn-primary");
+    $("#btnOn").attr("class", "btn btn-default");
   });
 
   $("#status").html("Ready");
 });
 
 function addColorButtons() {
-  $.each(colors, function(index, color) {
-    var template = $("#colorButtonTemplate").clone();
+  var hues = 25;
+  var hueStep = 360 / hues;
 
-    template.attr("id", "color-button-" + index);
+  var levels = 10;
+  var levelStep = 60 / levels;
 
-    var button = template.find(".btn-color");
-    button.css("background", color);
+  for(var l = 20; l < 80; l += levelStep) {
+    for(var h = 0; h < hues; h++) {
+      addColorButton(h * hueStep, 100, l);
+    }
+  }
 
-    button.click(function() {
-      var rgb = $(this).css('backgroundColor');
-      var components = rgbToComponents(rgb);
-
-      postColor("solidColor", components);
-    });
-
-    $("#colorButtonsRow").append(template);
+  $('.grid-color').isotope({
+    itemSelector: '.grid-item-color',
+    layoutMode: 'fitRows'
   });
+
+}
+
+var colorButtonIndex = 0;
+
+function addColorButton(h, s, l) {
+  var color = "hsla(" + h + ", " + s + "%, " + l + "%, 1)"
+  var template = $("#colorButtonTemplate").clone();
+  template.attr("id", "color-button-" + colorButtonIndex++);
+  template.css("background-color", color);
+  template.click(function() {
+    var rgb = $(this).css('backgroundColor');
+    var components = rgbToComponents(rgb);
+
+    $(".grid-item-color").css("border", "none");
+    $(this).css("border", "1px solid");
+
+    postColor("solidColor", components);
+  });
+
+  $("#colorButtonsRow").append(template);
 }
 
 function addPatternButtons() {
   $.each(patterns, function(index, pattern) {
     var template = $("#patternButtonTemplate").clone();
-
     template.attr("id", "pattern-button-" + index);
-
-    var button = template.find(".btn-pattern");
-
-    button.text(pattern);
-
-    button.click(function() {
+    template.text(pattern);
+    template.click(function() {
       postValue("patternName", pattern);
+      $(".grid-item-pattern").attr("class", "grid-item-pattern btn btn-default");
+      $(this).attr("class", "grid-item-pattern btn btn-primary");
     });
 
     $("#patternGrid").append(template);
   });
+
+  $('.grid-pattern').isotope({
+    itemSelector: '.grid-item-pattern',
+    layoutMode: 'fitRows'
+  });
+
 }
 
 function postValue(name, value) {
