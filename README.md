@@ -19,7 +19,7 @@ Hardware
 
 Features
 --------
-* Turn the NeoPixel Ring on and off
+* Turn the LEDs on and off
 * Adjust the brightness
 * Change the display pattern
 * Adjust the color
