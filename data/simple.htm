@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tree v2 by Evil Genius Labs</title>
+
+  <!-- request CSS from internet CDN -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  <!-- request CSS from the ESP8266 web server -->
+  <!-- <link rel="stylesheet" href="css/bootstrap.min.css"> -->
+
+  <link rel="stylesheet" href="css/simple.css">
+
+  <link rel="icon" href="images/atom196.png">
+</head>
+
+<body>
+
+  <div id="container" class="container">
+
+    <div id="colorButtonsRow" class="grid">
+
+    </div>
+
+    <div id="patternGrid" class="grid">
+    </div>
+
+  </div>
+
+  <div id="templates" style="display: none">
+
+    <div id="colorButtonTemplate" class="grid-item">
+      <div class="thumbnail btn-color" style="cursor: pointer">&nbsp;</div>
+    </div>
+
+    <div id="patternButtonTemplate" class="grid-item grid-item--width2">
+      <button class="btn btn-default btn-pattern">
+      </button>
+    </div>
+
+  </div>
+
+  <nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-2" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="navbar-collapse-2">
+        <ul class="nav navbar-nav">
+          <li>
+            <p class="navbar-text" id="status">Loading, please wait...</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- request js from internet CDN -->
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+
+  <!-- request js from the ESP8266 web server -->
+  <!-- <script src="js/jquery-3.1.1.min.js"></script> -->
+  <!-- <script src="js/bootstrap.min.js"></script> -->
+
+  <script src="js/simple.js"></script>
+
+</body>
+
+</html>

@@ -225,7 +225,7 @@ PatternAndNameList patterns = {
   { oceanNoise, "Ocean Noise" },
   { blackAndWhiteNoise, "Black & White Noise" },
   { blackAndBlueNoise, "Black & Blue Noise" },
-  
+
   { rainbow,                "Rainbow" },
   { rainbowWithGlitter,     "Rainbow With Glitter" },
   { rainbowSolid,           "Solid Rainbow" },
@@ -235,6 +235,7 @@ PatternAndNameList patterns = {
   { juggle,                 "Juggle" },
   { fire,                   "Fire" },
   { water,                  "Water" },
+
   //  { draw,                   "Draw" },
   { showSolidColor,         "Solid Color" }
 };
@@ -456,7 +457,7 @@ void sendString(String value)
 
 void broadcastInt(String name, uint8_t value)
 {
-  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}"; 
+  String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
   webSocketsServer.broadcastTXT(json);
 }
 
@@ -522,7 +523,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_DISCONNECTED:
       Serial.printf("[%u] Disconnected!\n", num);
       break;
-      
+
     case WStype_CONNECTED:
       {
         IPAddress ip = webSocketsServer.remoteIP(num);
@@ -532,7 +533,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         // webSocketsServer.sendTXT(num, "Connected");
       }
       break;
-      
+
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
 
@@ -542,7 +543,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       // send data to all connected clients
       // webSocketsServer.broadcastTXT("message here");
       break;
-      
+
     case WStype_BIN:
       Serial.printf("[%u] get binary length: %u\n", num, length);
       hexdump(payload, length);
@@ -1115,9 +1116,9 @@ void sinelon()
   fadeToBlackBy( leds, NUM_LEDS, 20);
   int pos = beatsin16(speed, 0, NUM_LEDS);
   static int prevpos = 0;
-  if( pos < prevpos ) { 
+  if( pos < prevpos ) {
     fill_solid( leds+pos, (prevpos-pos)+1, CHSV(gHue,220,255));
-  } else { 
+  } else {
     fill_solid( leds+prevpos, (pos-prevpos)+1, CHSV( gHue,220,255));
   }
   prevpos = pos;
@@ -1125,7 +1126,7 @@ void sinelon()
 
 void bpm()
 {
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)  
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t beat = beatsin8( speed, 64, 255);
   for ( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette(gCurrentPalette, gHue + (i * 2), beat - gHue + (i * 10));

@@ -1,0 +1,6 @@
+body { padding-bottom: 70px; }
+
+.grid-item { width: 20%; }
+.grid-item--width2 { width: 30%; }
+.btn-color { width: 64px; height: 64px; margin: 10px; }
+.btn-pattern { margin: 10px; padding: 10px; font-size: 18px; }

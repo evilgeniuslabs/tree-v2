@@ -9,7 +9,10 @@ url="http://$ip/edit"
 
 declare -a filenames=("css/styles.css"
                      "js/app.js"
-                     "index.htm")
+                     "index.htm"
+                     "css/simple.css"
+                     "js/simple.js"
+                     "simple.htm")
 
 # "images/atom196.png"
 # "favicon.ico"
