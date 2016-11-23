@@ -43,8 +43,8 @@ Compiling
 
 Follow the instructions on the following pages to install the required software for your OS (Windows, Linux, Mac):
 
-* Install [Arduino](http://www.arduino.cc/en/main/software)
-* Install [Arduino core for ESP8266](https://github.com/esp8266/Arduino)
+1. Install [Arduino](http://www.arduino.cc/en/main/software)
+2. Install [Arduino core for ESP8266](https://github.com/esp8266/Arduino)
 
 Download and install the following libraries, using the instructions here: https://www.arduino.cc/en/Guide/Libraries
 
