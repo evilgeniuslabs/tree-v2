@@ -496,7 +496,7 @@ void loop() {
   // change to a new cpt-city gradient palette
   EVERY_N_SECONDS( secondsPerPalette ) {
     gCurrentPaletteNumber = addmod8( gCurrentPaletteNumber, 1, gGradientPaletteCount);
-//    gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
+    gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
 
 //    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
 //    targetPalette = palettes[paletteIndex];

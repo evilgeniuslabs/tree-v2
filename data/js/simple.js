@@ -77,17 +77,37 @@ ws.onmessage = function(evt) {
         break;
 
       case "pattern":
-
+        $(".grid-item-pattern").attr("class", "grid-item-pattern btn btn-default");
+        $("#pattern-button-" + data.value).attr("class", "grid-item-pattern btn btn-primary");
         break;
     }
   }
 }
 
 $(document).ready(function() {
-  $("#status").html("Loading, please wait...");
+  $("#status").html("Connecting, please wait...");
+
+  $.get(urlBase + "all", function(data) {
+    $("#status").html("Loading, please wait...");
+
+    $.each(data, function(index, field) {
+      switch (field.name) {
+        case "power":
+          if(field.value == 1) {
+            $("#btnOn").attr("class", "btn btn-primary");
+          } else {
+            $("#btnOff").attr("class", "btn btn-primary");
+          }
+          break;
+
+        case "pattern":
+          addPatternButtons(field);
+          break;
+      }
+    });
+  });
 
   addColorButtons();
-  addPatternButtons();
 
   $("#btnOn").click(function() {
     postValue("power", 1);
@@ -144,13 +164,17 @@ function addColorButton(h, s, l) {
   $("#colorButtonsRow").append(template);
 }
 
-function addPatternButtons() {
-  $.each(patterns, function(index, pattern) {
+function addPatternButtons(patternField) {
+  $.each(patternField.options, function(index, pattern) {
+    if($.inArray(pattern, patterns) == -1)
+      return;
+
     var template = $("#patternButtonTemplate").clone();
     template.attr("id", "pattern-button-" + index);
     template.text(pattern);
     template.click(function() {
       postValue("patternName", pattern);
+      $(".grid-item-color").css("border", "none");
       $(".grid-item-pattern").attr("class", "grid-item-pattern btn btn-default");
       $(this).attr("class", "grid-item-pattern btn btn-primary");
     });
@@ -163,6 +187,7 @@ function addPatternButtons() {
     layoutMode: 'fitRows'
   });
 
+  $("#pattern-button-" + patternField.value).attr("class", "grid-item-pattern btn btn-primary");
 }
 
 function postValue(name, value) {
