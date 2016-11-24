@@ -57,6 +57,32 @@ var patterns = [
   "Water"
 ];
 
+var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
+ws.debug = true;
+
+ws.onmessage = function(evt) {
+  if(evt.data != null)
+  {
+    var data = JSON.parse(evt.data);
+    if(data == null) return;
+    switch(data.name) {
+      case "power":
+        if(data.value == 1) {
+          $("#btnOn").attr("class", "btn btn-primary");
+          $("#btnOff").attr("class", "btn btn-default");
+        } else {
+          $("#btnOff").attr("class", "btn btn-primary");
+          $("#btnOn").attr("class", "btn btn-default");
+        }
+        break;
+
+      case "pattern":
+
+        break;
+    }
+  }
+}
+
 $(document).ready(function() {
   $("#status").html("Loading, please wait...");
 
