@@ -7,7 +7,7 @@ White xmas tree with 250 8mm WS2811 RGB LEDs, driven with an ESP8266, and contro
 
 [![Demo Videos](http://img.youtube.com/vi/fpioieRDVrk/0.jpg)](https://youtu.be/fpioieRDVrk?list=PLUYGVM-2vDxJKi8lgQGImMW3xGfPCup2E)
 
-More details: https://www.evilgeniuslabs.org/tree-v2.html
+More details and build instructions: https://www.evilgeniuslabs.org/tree-v2.html
 
 Hardware
 --------
@@ -26,6 +26,9 @@ Features
 
 Web App
 --------
+
+[![Web App](web-app-thumb.png)](web-app.png) 
+[![Simple Web App](web-app-simple-thumb.png)](web-app-simple.png)
 
 Patterns are requested by the app from the ESP8266, so as new patterns are added, they're automatically listed in the app.
 
