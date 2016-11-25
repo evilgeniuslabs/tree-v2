@@ -12,6 +12,7 @@
   width: 100px;
   height: 100px;
   margin: 5px;
+  padding: 6px;
   white-space: normal;
   cursor: pointer;
 }

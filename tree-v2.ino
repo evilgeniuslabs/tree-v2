@@ -166,7 +166,9 @@ PatternAndNameList patterns = {
   { pride2,                 "Pride 2" },
 
   { colorWaves,             "Color Waves" },
-  { colorWaves2,             "Color Waves 2" },
+  { colorWaves2,            "Color Waves 2" },
+
+  { waves,                   "Waves" },
 
   { northwardRainbow,       "Northward Rainbow" },
   { northeastwardRainbow,   "Northeastward Rainbow" },
@@ -504,7 +506,7 @@ void loop() {
 
   EVERY_N_MILLISECONDS(40) {
     // slowly blend the current palette to the next
-    nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 16);
+    nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 8);
 //    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
@@ -1484,4 +1486,14 @@ void palettetest( CRGB* ledarray, uint16_t numleds, const CRGBPalette16& gCurren
   static uint8_t startindex = 0;
   startindex--;
   fill_palette( ledarray, numleds, startindex, (256 / NUM_LEDS) + 1, gCurrentPalette, 255, LINEARBLEND);
+}
+
+void waves() {
+  fadeToBlackBy( leds, NUM_LEDS, 20);
+
+  for(uint8_t levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+    for(uint8_t i = levelStart[levelIndex]; i < levelEnd[levelIndex]; i++) {
+      leds[i] = ColorFromPalette(gCurrentPalette, gHue + levelIndex, beatsin8(speed + levelIndex));
+    }
+  }
 }
