@@ -168,7 +168,7 @@ PatternAndNameList patterns = {
   { colorWaves,             "Color Waves" },
   { colorWaves2,            "Color Waves 2" },
 
-  { waves,                   "Waves" },
+  { paletteWaves,           "Palette Waves" },
 
   { northwardRainbow,       "Northward Rainbow" },
   { northeastwardRainbow,   "Northeastward Rainbow" },
@@ -385,6 +385,24 @@ void setup() {
     speed = value.toInt();
     broadcastInt("speed", speed);
     sendInt(speed);
+  });
+
+  webServer.on("/twinkleSpeed", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    twinkleSpeed = value.toInt();
+    if(twinkleSpeed < 0) twinkleSpeed = 0;
+    else if (twinkleSpeed > 8) twinkleSpeed = 8;
+    broadcastInt("twinkleSpeed", twinkleSpeed);
+    sendInt(twinkleSpeed);
+  });
+
+  webServer.on("/twinkleDensity", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    twinkleDensity = value.toInt();
+    if(twinkleDensity < 0) twinkleDensity = 0;
+    else if (twinkleDensity > 8) twinkleDensity = 8;
+    broadcastInt("twinkleDensity", twinkleDensity);
+    sendInt(twinkleDensity);
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
@@ -1488,7 +1506,7 @@ void palettetest( CRGB* ledarray, uint16_t numleds, const CRGBPalette16& gCurren
   fill_palette( ledarray, numleds, startindex, (256 / NUM_LEDS) + 1, gCurrentPalette, 255, LINEARBLEND);
 }
 
-void waves() {
+void paletteWaves() {
   fadeToBlackBy( leds, NUM_LEDS, 20);
 
   for(uint8_t levelIndex = 0; levelIndex < levelCount; levelIndex++) {

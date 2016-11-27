@@ -29,6 +29,8 @@ typedef struct Field {
   String name;
   String label;
   String type;
+  uint8_t min;
+  uint8_t max;
   FieldGetter getValue;
   FieldGetter getOptions;
   FieldSetter setValue;
@@ -77,6 +79,11 @@ String getFieldsJson(FieldList fields, uint8_t count) {
       else {
         json += ",\"value\":" + field.getValue();
       }
+    }
+
+    if (field.type == NumberFieldType) {
+      json += ",\"min\":" + String(field.min);
+      json += ",\"max\":" + String(field.max);
     }
 
     if (field.getOptions) {

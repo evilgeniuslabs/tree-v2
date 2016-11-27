@@ -18,6 +18,8 @@ var patterns = [
   "Color Waves",
   "Color Waves 2",
 
+  "Palette Waves",
+
   "Falling Rainbow",
   "Rising Rainbow",
 
