@@ -158,10 +158,15 @@ typedef PatternAndName PatternAndNameList[];
 #include "Twinkles.h"
 #include "TwinkleFOX.h"
 #include "Noise.h"
+#include "Meteors.h"
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
 PatternAndNameList patterns = {
+  { whiteMeteors,           "White Meteors" },
+  { rainbowMeteors,         "Rainbow Meteors" },
+  { paletteMeteors,         "Palette Meteors" },
+
   { pride,                  "Pride" },
   { pride2,                 "Pride 2" },
 

@@ -4,7 +4,7 @@
 # investigate using a single file to bring in the defaults
 # ip=$(< ip.txt)
 
-ip=${1:-"192.168.1.13"}
+ip=${1:-"192.168.0.103"}
 url="http://$ip/edit"
 
 declare -a filenames=("css/styles.css"
