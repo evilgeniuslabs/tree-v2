@@ -116,7 +116,7 @@ const uint8_t yCoords[NUM_LEDS] = {
 };
 
 uint8_t getNearestToAngleAndLevel(uint8_t angle, uint8_t level) {
-  uint8_t smallestDifference = 0;
+  uint8_t smallestDifference = 255;
   uint8_t nearestIndex = 0;
 
   for(uint8_t i = 0; i < NUM_LEDS; i++) {
@@ -127,7 +127,9 @@ uint8_t getNearestToAngleAndLevel(uint8_t angle, uint8_t level) {
 
     uint8_t difference = abs(currentAngle - angle);
 
-    if(difference >= smallestDifference)
+    if(difference > smallestDifference)
+      continue;
+    else if (difference == smallestDifference && random8() > 127)
       continue;
 
     smallestDifference = difference;

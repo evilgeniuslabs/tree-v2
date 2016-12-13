@@ -182,7 +182,7 @@ unsigned long decodeIRCode() {
 
   // Attempt to read an IR code ?
   if (irReceiver.decode(&results)) {
-    delay(20);
+    // delay(20);
 
     if (results.value != 0)
       Serial.println(results.value);

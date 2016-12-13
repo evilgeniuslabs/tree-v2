@@ -39,7 +39,7 @@ extern "C" {
 
 #define HOSTNAME "ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
 
-#define RECV_PIN D6
+#define RECV_PIN D4
 IRrecv irReceiver(RECV_PIN);
 
 #include "Commands.h"
@@ -510,7 +510,7 @@ void loop() {
   if (power == 0) {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
-    FastLED.delay(15);
+    // FastLED.delay(15);
     return;
   }
 
@@ -545,7 +545,7 @@ void loop() {
   FastLED.show();
 
   // insert a delay to keep the framerate modest
-  FastLED.delay(1000 / FRAMES_PER_SECOND);
+  // FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
@@ -587,7 +587,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
 void handleIrInput()
 {
-  InputCommand command = readCommand(defaultHoldDelay);
+  InputCommand command = readCommand();
 
   if (command != InputCommand::None) {
     Serial.print("command: ");
