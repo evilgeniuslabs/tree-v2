@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
@@ -24,26 +25,25 @@ extern "C" {
 }
 
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
+//#include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <WebSocketsServer.h>
 #include <FS.h>
 #include <EEPROM.h>
-#include <IRremoteESP8266.h>
+// #include <IRremoteESP8266.h>
 #include "GradientPalettes.h"
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 #include "Field.h"
 
-#define HOSTNAME "ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
+#define HOSTNAME "Tree-ESP8266-" ///< Hostname. The setup function adds the Chip ID at the end.
 
-#define RECV_PIN D4
-IRrecv irReceiver(RECV_PIN);
+//#define RECV_PIN D4
+//IRrecv irReceiver(RECV_PIN);
 
-#include "Commands.h"
-#include "elapsedMillis.h"
+//#include "Commands.h"
 
 const bool apMode = false;
 
@@ -117,27 +117,6 @@ unsigned long autoPlayTimeout = 0;
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 CRGB solidColor = CRGB::Blue;
-
-//uint8_t paletteIndex = 0;
-//
-//// List of palettes to cycle through.
-//CRGBPalette16 palettes[] =
-//{
-//  RainbowColors_p,
-//  /*RainbowStripeColors_p,*/
-//  CloudColors_p,
-//  OceanColors_p,
-//  ForestColors_p,
-//  HeatColors_p,
-//  LavaColors_p,
-//  PartyColors_p,
-//  IceColors_p,
-//};
-//
-//uint8_t paletteCount = ARRAY_SIZE(palettes);
-//
-//CRGBPalette16 currentPalette(CRGB::Black);
-//CRGBPalette16 targetPalette = palettes[paletteIndex];
 
 // scale the brightness of all pixels down
 void dimAll(byte value)
@@ -259,9 +238,9 @@ void setup() {
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);         // for WS2812 (Neopixel)
   //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS); // for APA102 (Dotstar)
   FastLED.setDither(false);
-  FastLED.setCorrection(TypicalLEDStrip);
+  FastLED.setCorrection(Typical8mmPixel);
   FastLED.setBrightness(brightness);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
+  //  FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
   fill_solid(leds, NUM_LEDS, CRGB::Black);
   FastLED.show();
 
@@ -270,7 +249,7 @@ void setup() {
 
   FastLED.setBrightness(brightness);
 
-  irReceiver.enableIRIn(); // Start the receiver
+  //  irReceiver.enableIRIn(); // Start the receiver
 
   Serial.println();
   Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
@@ -305,10 +284,10 @@ void setup() {
   for (uint8_t i = 0; i < hostname.length(); i++)
     hostnameChar[i] = hostname.charAt(i);
 
-  MDNS.begin(hostnameChar);
-
-  // Add service to MDNS-SD
-  MDNS.addService("http", "tcp", 80);
+  //  MDNS.begin(hostnameChar);
+  //
+  //  // Add service to MDNS-SD
+  //  MDNS.addService("http", "tcp", 80);
 
   // Print hostname.
   Serial.println("Hostname: " + hostname);
@@ -339,6 +318,7 @@ void setup() {
   }
   else
   {
+    WiFi.mode(WIFI_STA);
     Serial.printf("Connecting to %s\n", ssid);
     if (String(WiFi.SSID()) != String(ssid)) {
       WiFi.begin(ssid, password);
@@ -505,7 +485,7 @@ void loop() {
   webSocketsServer.loop();
   webServer.handleClient();
 
-  handleIrInput();
+  // handleIrInput();
 
   if (power == 0) {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
@@ -585,212 +565,212 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
   }
 }
 
-void handleIrInput()
-{
-  InputCommand command = readCommand();
-
-  if (command != InputCommand::None) {
-    Serial.print("command: ");
-    Serial.println((int) command);
-  }
-
-  switch (command) {
-    case InputCommand::Up: {
-        adjustPattern(true);
-        break;
-      }
-    case InputCommand::Down: {
-        adjustPattern(false);
-        break;
-      }
-    case InputCommand::Power: {
-        setPower(power == 0 ? 1 : 0);
-        break;
-      }
-    case InputCommand::BrightnessUp: {
-        adjustBrightness(true);
-        break;
-      }
-    case InputCommand::BrightnessDown: {
-        adjustBrightness(false);
-        break;
-      }
-    case InputCommand::PlayMode: { // toggle pause/play
-        setAutoplay(!autoplay);
-        break;
-      }
-
-    // pattern buttons
-
-    case InputCommand::Pattern1: {
-        setPattern(0);
-        break;
-      }
-    case InputCommand::Pattern2: {
-        setPattern(1);
-        break;
-      }
-    case InputCommand::Pattern3: {
-        setPattern(2);
-        break;
-      }
-    case InputCommand::Pattern4: {
-        setPattern(3);
-        break;
-      }
-    case InputCommand::Pattern5: {
-        setPattern(4);
-        break;
-      }
-    case InputCommand::Pattern6: {
-        setPattern(5);
-        break;
-      }
-    case InputCommand::Pattern7: {
-        setPattern(6);
-        break;
-      }
-    case InputCommand::Pattern8: {
-        setPattern(7);
-        break;
-      }
-    case InputCommand::Pattern9: {
-        setPattern(8);
-        break;
-      }
-    case InputCommand::Pattern10: {
-        setPattern(9);
-        break;
-      }
-    case InputCommand::Pattern11: {
-        setPattern(10);
-        break;
-      }
-    case InputCommand::Pattern12: {
-        setPattern(11);
-        break;
-      }
-
-    // custom color adjustment buttons
-
-    case InputCommand::RedUp: {
-        solidColor.red += 8;
-        setSolidColor(solidColor);
-        break;
-      }
-    case InputCommand::RedDown: {
-        solidColor.red -= 8;
-        setSolidColor(solidColor);
-        break;
-      }
-    case InputCommand::GreenUp: {
-        solidColor.green += 8;
-        setSolidColor(solidColor);
-        break;
-      }
-    case InputCommand::GreenDown: {
-        solidColor.green -= 8;
-        setSolidColor(solidColor);
-        break;
-      }
-    case InputCommand::BlueUp: {
-        solidColor.blue += 8;
-        setSolidColor(solidColor);
-        break;
-      }
-    case InputCommand::BlueDown: {
-        solidColor.blue -= 8;
-        setSolidColor(solidColor);
-        break;
-      }
-
-    // color buttons
-
-    case InputCommand::Red: {
-        setSolidColor(CRGB::Red);
-        break;
-      }
-    case InputCommand::RedOrange: {
-        setSolidColor(CRGB::OrangeRed);
-        break;
-      }
-    case InputCommand::Orange: {
-        setSolidColor(CRGB::Orange);
-        break;
-      }
-    case InputCommand::YellowOrange: {
-        setSolidColor(CRGB::Goldenrod);
-        break;
-      }
-    case InputCommand::Yellow: {
-        setSolidColor(CRGB::Yellow);
-        break;
-      }
-
-    case InputCommand::Green: {
-        setSolidColor(CRGB::Green);
-        break;
-      }
-    case InputCommand::Lime: {
-        setSolidColor(CRGB::Lime);
-        break;
-      }
-    case InputCommand::Aqua: {
-        setSolidColor(CRGB::Aqua);
-        break;
-      }
-    case InputCommand::Teal: {
-        setSolidColor(CRGB::Teal);
-        break;
-      }
-    case InputCommand::Navy: {
-        setSolidColor(CRGB::Navy);
-        break;
-      }
-
-    case InputCommand::Blue: {
-        setSolidColor(CRGB::Blue);
-        break;
-      }
-    case InputCommand::RoyalBlue: {
-        setSolidColor(CRGB::RoyalBlue);
-        break;
-      }
-    case InputCommand::Purple: {
-        setSolidColor(CRGB::Purple);
-        break;
-      }
-    case InputCommand::Indigo: {
-        setSolidColor(CRGB::Indigo);
-        break;
-      }
-    case InputCommand::Magenta: {
-        setSolidColor(CRGB::Magenta);
-        break;
-      }
-
-    case InputCommand::White: {
-        setSolidColor(CRGB::White);
-        break;
-      }
-    case InputCommand::Pink: {
-        setSolidColor(CRGB::Pink);
-        break;
-      }
-    case InputCommand::LightPink: {
-        setSolidColor(CRGB::LightPink);
-        break;
-      }
-    case InputCommand::BabyBlue: {
-        setSolidColor(CRGB::CornflowerBlue);
-        break;
-      }
-    case InputCommand::LightBlue: {
-        setSolidColor(CRGB::LightBlue);
-        break;
-      }
-  }
-}
+//void handleIrInput()
+//{
+//  InputCommand command = readCommand(defaultHoldDelay);
+//
+//  if (command != InputCommand::None) {
+//    Serial.print("command: ");
+//    Serial.println((int) command);
+//  }
+//
+//  switch (command) {
+//    case InputCommand::Up: {
+//        adjustPattern(true);
+//        break;
+//      }
+//    case InputCommand::Down: {
+//        adjustPattern(false);
+//        break;
+//      }
+//    case InputCommand::Power: {
+//        setPower(power == 0 ? 1 : 0);
+//        break;
+//      }
+//    case InputCommand::BrightnessUp: {
+//        adjustBrightness(true);
+//        break;
+//      }
+//    case InputCommand::BrightnessDown: {
+//        adjustBrightness(false);
+//        break;
+//      }
+//    case InputCommand::PlayMode: { // toggle pause/play
+//        setAutoplay(!autoplay);
+//        break;
+//      }
+//
+//    // pattern buttons
+//
+//    case InputCommand::Pattern1: {
+//        setPattern(0);
+//        break;
+//      }
+//    case InputCommand::Pattern2: {
+//        setPattern(1);
+//        break;
+//      }
+//    case InputCommand::Pattern3: {
+//        setPattern(2);
+//        break;
+//      }
+//    case InputCommand::Pattern4: {
+//        setPattern(3);
+//        break;
+//      }
+//    case InputCommand::Pattern5: {
+//        setPattern(4);
+//        break;
+//      }
+//    case InputCommand::Pattern6: {
+//        setPattern(5);
+//        break;
+//      }
+//    case InputCommand::Pattern7: {
+//        setPattern(6);
+//        break;
+//      }
+//    case InputCommand::Pattern8: {
+//        setPattern(7);
+//        break;
+//      }
+//    case InputCommand::Pattern9: {
+//        setPattern(8);
+//        break;
+//      }
+//    case InputCommand::Pattern10: {
+//        setPattern(9);
+//        break;
+//      }
+//    case InputCommand::Pattern11: {
+//        setPattern(10);
+//        break;
+//      }
+//    case InputCommand::Pattern12: {
+//        setPattern(11);
+//        break;
+//      }
+//
+//    // custom color adjustment buttons
+//
+//    case InputCommand::RedUp: {
+//        solidColor.red += 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//    case InputCommand::RedDown: {
+//        solidColor.red -= 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//    case InputCommand::GreenUp: {
+//        solidColor.green += 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//    case InputCommand::GreenDown: {
+//        solidColor.green -= 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//    case InputCommand::BlueUp: {
+//        solidColor.blue += 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//    case InputCommand::BlueDown: {
+//        solidColor.blue -= 8;
+//        setSolidColor(solidColor);
+//        break;
+//      }
+//
+//    // color buttons
+//
+//    case InputCommand::Red: {
+//        setSolidColor(CRGB::Red);
+//        break;
+//      }
+//    case InputCommand::RedOrange: {
+//        setSolidColor(CRGB::OrangeRed);
+//        break;
+//      }
+//    case InputCommand::Orange: {
+//        setSolidColor(CRGB::Orange);
+//        break;
+//      }
+//    case InputCommand::YellowOrange: {
+//        setSolidColor(CRGB::Goldenrod);
+//        break;
+//      }
+//    case InputCommand::Yellow: {
+//        setSolidColor(CRGB::Yellow);
+//        break;
+//      }
+//
+//    case InputCommand::Green: {
+//        setSolidColor(CRGB::Green);
+//        break;
+//      }
+//    case InputCommand::Lime: {
+//        setSolidColor(CRGB::Lime);
+//        break;
+//      }
+//    case InputCommand::Aqua: {
+//        setSolidColor(CRGB::Aqua);
+//        break;
+//      }
+//    case InputCommand::Teal: {
+//        setSolidColor(CRGB::Teal);
+//        break;
+//      }
+//    case InputCommand::Navy: {
+//        setSolidColor(CRGB::Navy);
+//        break;
+//      }
+//
+//    case InputCommand::Blue: {
+//        setSolidColor(CRGB::Blue);
+//        break;
+//      }
+//    case InputCommand::RoyalBlue: {
+//        setSolidColor(CRGB::RoyalBlue);
+//        break;
+//      }
+//    case InputCommand::Purple: {
+//        setSolidColor(CRGB::Purple);
+//        break;
+//      }
+//    case InputCommand::Indigo: {
+//        setSolidColor(CRGB::Indigo);
+//        break;
+//      }
+//    case InputCommand::Magenta: {
+//        setSolidColor(CRGB::Magenta);
+//        break;
+//      }
+//
+//    case InputCommand::White: {
+//        setSolidColor(CRGB::White);
+//        break;
+//      }
+//    case InputCommand::Pink: {
+//        setSolidColor(CRGB::Pink);
+//        break;
+//      }
+//    case InputCommand::LightPink: {
+//        setSolidColor(CRGB::LightPink);
+//        break;
+//      }
+//    case InputCommand::BabyBlue: {
+//        setSolidColor(CRGB::CornflowerBlue);
+//        break;
+//      }
+//    case InputCommand::LightBlue: {
+//        setSolidColor(CRGB::LightBlue);
+//        break;
+//      }
+//  }
+//}
 
 void loadSettings()
 {
@@ -885,8 +865,10 @@ void adjustPattern(bool up)
   if (currentPatternIndex >= patternCount)
     currentPatternIndex = 0;
 
+  if (autoplay == 0) {
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
+  }
 
   broadcastInt("pattern", currentPatternIndex);
 }
@@ -898,8 +880,10 @@ void setPattern(uint8_t value)
 
   currentPatternIndex = value;
 
+  if (autoplay == 0) {
   EEPROM.write(1, currentPatternIndex);
   EEPROM.commit();
+  }
 
   broadcastInt("pattern", currentPatternIndex);
 }
@@ -1216,10 +1200,6 @@ void fire()
 void water()
 {
   heatMap(IceColors_p, false);
-}
-
-void draw()
-{
 }
 
 // Pride2015 by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
