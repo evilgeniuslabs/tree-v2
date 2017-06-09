@@ -865,9 +865,9 @@ void adjustPattern(bool up)
   if (currentPatternIndex >= patternCount)
     currentPatternIndex = 0;
 
-  if (autoplay == 0) {
-  EEPROM.write(1, currentPatternIndex);
-  EEPROM.commit();
+  if (autoplay == 0){
+    EEPROM.write(1, currentPatternIndex);
+    EEPROM.commit();
   }
 
   broadcastInt("pattern", currentPatternIndex);
@@ -880,9 +880,9 @@ void setPattern(uint8_t value)
 
   currentPatternIndex = value;
 
-  if (autoplay == 0) {
-  EEPROM.write(1, currentPatternIndex);
-  EEPROM.commit();
+  if (autoplay == 0){
+    EEPROM.write(1, currentPatternIndex);
+    EEPROM.commit();
   }
 
   broadcastInt("pattern", currentPatternIndex);
