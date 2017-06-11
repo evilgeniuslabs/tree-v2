@@ -16,7 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define FASTLED_ALLOW_INTERRUPTS 0
+//#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_INTERRUPT_RETRY_COUNT 0
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
@@ -65,7 +66,7 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #define COLOR_ORDER   RGB
 #define NUM_LEDS      250
 
-#define MILLI_AMPS         5000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         15000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  240 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 #include "Map.h"
@@ -231,6 +232,8 @@ const uint8_t patternCount = ARRAY_SIZE(patterns);
 #include "Fields.h"
 
 void setup() {
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  
   Serial.begin(115200);
   delay(100);
   Serial.setDebugOutput(true);
@@ -240,7 +243,7 @@ void setup() {
   FastLED.setDither(false);
   FastLED.setCorrection(Typical8mmPixel);
   FastLED.setBrightness(brightness);
-  //  FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
   fill_solid(leds, NUM_LEDS, CRGB::Black);
   FastLED.show();
 
@@ -375,7 +378,7 @@ void setup() {
   webServer.on("/twinkleSpeed", HTTP_POST, []() {
     String value = webServer.arg("value");
     twinkleSpeed = value.toInt();
-    if(twinkleSpeed < 0) twinkleSpeed = 0;
+    if (twinkleSpeed < 0) twinkleSpeed = 0;
     else if (twinkleSpeed > 8) twinkleSpeed = 8;
     broadcastInt("twinkleSpeed", twinkleSpeed);
     sendInt(twinkleSpeed);
@@ -384,7 +387,7 @@ void setup() {
   webServer.on("/twinkleDensity", HTTP_POST, []() {
     String value = webServer.arg("value");
     twinkleDensity = value.toInt();
-    if(twinkleDensity < 0) twinkleDensity = 0;
+    if (twinkleDensity < 0) twinkleDensity = 0;
     else if (twinkleDensity > 8) twinkleDensity = 8;
     broadcastInt("twinkleDensity", twinkleDensity);
     sendInt(twinkleDensity);
@@ -494,23 +497,23 @@ void loop() {
     return;
   }
 
-//   EVERY_N_SECONDS(10) {
-//     Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
-//   }
+  //   EVERY_N_SECONDS(10) {
+  //     Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
+  //   }
 
   // change to a new cpt-city gradient palette
   EVERY_N_SECONDS( secondsPerPalette ) {
     gCurrentPaletteNumber = addmod8( gCurrentPaletteNumber, 1, gGradientPaletteCount);
     gTargetPalette = gGradientPalettes[ gCurrentPaletteNumber ];
 
-//    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
-//    targetPalette = palettes[paletteIndex];
+    //    paletteIndex = addmod8( paletteIndex, 1, paletteCount);
+    //    targetPalette = palettes[paletteIndex];
   }
 
   EVERY_N_MILLISECONDS(40) {
     // slowly blend the current palette to the next
     nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 8);
-//    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
+    //    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
 
@@ -865,7 +868,7 @@ void adjustPattern(bool up)
   if (currentPatternIndex >= patternCount)
     currentPatternIndex = 0;
 
-  if (autoplay == 0){
+  if (autoplay == 0) {
     EEPROM.write(1, currentPatternIndex);
     EEPROM.commit();
   }
@@ -880,7 +883,7 @@ void setPattern(uint8_t value)
 
   currentPatternIndex = value;
 
-  if (autoplay == 0){
+  if (autoplay == 0) {
     EEPROM.write(1, currentPatternIndex);
     EEPROM.commit();
   }
@@ -890,8 +893,8 @@ void setPattern(uint8_t value)
 
 void setPatternName(String name)
 {
-  for(uint8_t i = 0; i < patternCount; i++) {
-    if(patterns[i].name == name) {
+  for (uint8_t i = 0; i < patternCount; i++) {
+    if (patterns[i].name == name) {
       setPattern(i);
       break;
     }
@@ -1141,10 +1144,10 @@ void sinelon()
   fadeToBlackBy( leds, NUM_LEDS, 20);
   int pos = beatsin16(speed, 0, NUM_LEDS);
   static int prevpos = 0;
-  if( pos < prevpos ) {
-    fill_solid( leds+pos, (prevpos-pos)+1, CHSV(gHue,220,255));
+  if ( pos < prevpos ) {
+    fill_solid( leds + pos, (prevpos - pos) + 1, CHSV(gHue, 220, 255));
   } else {
-    fill_solid( leds+prevpos, (pos-prevpos)+1, CHSV( gHue,220,255));
+    fill_solid( leds + prevpos, (pos - prevpos) + 1, CHSV( gHue, 220, 255));
   }
   prevpos = pos;
 }
@@ -1494,8 +1497,8 @@ void palettetest( CRGB* ledarray, uint16_t numleds, const CRGBPalette16& gCurren
 void paletteWaves() {
   fadeToBlackBy( leds, NUM_LEDS, 20);
 
-  for(uint8_t levelIndex = 0; levelIndex < levelCount; levelIndex++) {
-    for(uint8_t i = levelStart[levelIndex]; i < levelEnd[levelIndex]; i++) {
+  for (uint8_t levelIndex = 0; levelIndex < levelCount; levelIndex++) {
+    for (uint8_t i = levelStart[levelIndex]; i < levelEnd[levelIndex]; i++) {
       leds[i] = ColorFromPalette(gCurrentPalette, gHue + levelIndex, beatsin8(speed + levelIndex));
     }
   }
