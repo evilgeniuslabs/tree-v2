@@ -76,7 +76,7 @@ void SetupBlackAndBlueStripedPalette()
 
 void drawNoise(CRGBPalette16 palette)
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+  for (uint16_t i = 0; i < NUM_LEDS; i++) {
     uint8_t x = xCoords[i];
     uint8_t y = yCoords[i];
     uint8_t z = zCoords[i];
