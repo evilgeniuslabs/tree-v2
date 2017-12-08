@@ -62,11 +62,11 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #include "FSBrowser.h"
 
 #define DATA_PIN      D7
-#define LED_TYPE      WS2811
-#define COLOR_ORDER   RGB
-#define NUM_LEDS      250
+#define LED_TYPE      WS2812
+#define COLOR_ORDER   GBR
+#define NUM_LEDS      300
 
-#define MILLI_AMPS         15000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         4000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  240 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 #include "Map.h"
