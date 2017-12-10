@@ -62,8 +62,10 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #include "FSBrowser.h"
 
 #define DATA_PIN      D7
-#define LED_TYPE      WS2812
-#define COLOR_ORDER   GBR
+#define LED_TYPE      WS2811
+// #define LED_TYPE      WS2812 //for WS2812 strips
+#define COLOR_ORDER   RGB
+// #define COLOR_ORDER   GRB //for WS2812 strips
 #define NUM_LEDS      300
 
 #define MILLI_AMPS         4000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
