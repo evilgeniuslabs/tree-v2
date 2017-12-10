@@ -54,11 +54,11 @@ for led in xrange(NUM_LEDS):
     yCoords.append(int(128 + (current_radii / 2) * sin(radians((current_angle/256)*360))))
     current_angle += angles_steps[current_circle]
 
-print("const uint16_t radii[NUM_LEDS] = {")
+print("const uint8_t radii[NUM_LEDS] = {")
 print str(radii)[1:-1]
 print("};")
 
-print("const uint16_t angles[NUM_LEDS] = {")
+print("const uint8_t angles[NUM_LEDS] = {")
 print str(angles)[1:-1]
 print("};")
 
@@ -67,27 +67,27 @@ print("const uint8_t ledsPerLevel[levelCount] = {")
 print str(LEDS_PER_CIRCLE)[1:-1]
 print("};")
 
-print("const uint8_t levelStart[levelCount] = {")
+print("const uint16_t levelStart[levelCount] = {")
 print str(levelStart)[1:-1]
 print("};")
 
-print("const uint8_t levelEnd[levelCount] = {")
+print("const uint16_t levelEnd[levelCount] = {")
 print str(levelEnd)[1:-1]
 print("};")
 
-print("const uint16_t levels[NUM_LEDS] = {")
+print("const uint8_t levels[NUM_LEDS] = {")
 print str(levels)[1:-1]
 print("};")
 
-print("const uint16_t zCoords[NUM_LEDS] = {")
+print("const uint8_t zCoords[NUM_LEDS] = {")
 print str(zCoords)[1:-1]
 print("};")
 
-print("const uint16_t xCoords[NUM_LEDS] = {")
+print("const uint8_t xCoords[NUM_LEDS] = {")
 print str(xCoords)[1:-1]
 print("};")
 
-print("const uint16_t yCoords[NUM_LEDS] = {")
+print("const uint8_t yCoords[NUM_LEDS] = {")
 print str(yCoords)[1:-1]
 print("};")
 
