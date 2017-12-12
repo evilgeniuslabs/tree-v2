@@ -63,10 +63,12 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 
 #define DATA_PIN      D7
 #define LED_TYPE      WS2811
+// #define LED_TYPE      WS2812 //for WS2812 strips
 #define COLOR_ORDER   RGB
-#define NUM_LEDS      250
+// #define COLOR_ORDER   GRB //for WS2812 strips
+#define NUM_LEDS      300
 
-#define MILLI_AMPS         15000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         4000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  240 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 #include "Map.h"
@@ -936,7 +938,7 @@ void setBrightness(uint8_t value)
 
 void strandTest()
 {
-  static uint8_t i = 0;
+  static uint16_t i = 0;
 
   EVERY_N_SECONDS(1)
   {
@@ -959,7 +961,7 @@ void showSolidColor()
 
 void northwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(yCoords[i] - beat8(speed), 255, 255);
   }
@@ -967,7 +969,7 @@ void northwardRainbow()
 
 void northeastwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
@@ -975,7 +977,7 @@ void northeastwardRainbow()
 
 void eastwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(xCoords[i] - beat8(speed), 255, 255);
   }
@@ -983,7 +985,7 @@ void eastwardRainbow()
 
 void southeastwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV((xCoords[i] - yCoords[i]) + beat8(speed), 255, 255);
   }
@@ -991,7 +993,7 @@ void southeastwardRainbow()
 
 void southwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(yCoords[i] + beat8(speed), 255, 255);
   }
@@ -999,7 +1001,7 @@ void southwardRainbow()
 
 void southwestwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
@@ -1007,7 +1009,7 @@ void southwestwardRainbow()
 
 void westwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(xCoords[i] + beat8(speed), 255, 255);
   }
@@ -1015,7 +1017,7 @@ void westwardRainbow()
 
 void northwestwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV((xCoords[i] + yCoords[i]) - beat8(speed), 255, 255);
   }
@@ -1023,7 +1025,7 @@ void northwestwardRainbow()
 
 void inwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(radii[i] / 4 + beat8(speed), 255, 255);
   }
@@ -1031,7 +1033,7 @@ void inwardRainbow()
 
 void outwardRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(radii[i] / 4 - beat8(speed), 255, 255);
   }
@@ -1039,7 +1041,7 @@ void outwardRainbow()
 
 void rotatingRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(angles[i] + beat8(speed), 255, 255);
   }
@@ -1047,7 +1049,7 @@ void rotatingRainbow()
 
 void risingRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(zCoords[i] - beat8(speed), 255, 255);
   }
@@ -1055,7 +1057,7 @@ void risingRainbow()
 
 void fallingRainbow()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = CHSV(zCoords[i] + beat8(speed), 255, 255);
   }
@@ -1065,7 +1067,7 @@ void fallingRainbow()
 
 void inwardPalette()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, radii[i] / 4 + beat8(speed));
   }
@@ -1073,7 +1075,7 @@ void inwardPalette()
 
 void outwardPalette()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, radii[i] / 4 - beat8(speed));
   }
@@ -1081,7 +1083,7 @@ void outwardPalette()
 
 void rotatingPalette()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, angles[i] + beat8(speed));
   }
@@ -1089,14 +1091,14 @@ void rotatingPalette()
 
 void risingPalette()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 - beat8(speed));
   }
 }
 
 void candyCane() {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(RedWhite_p, zCoords[i] - beat8(speed));
   }
@@ -1104,7 +1106,7 @@ void candyCane() {
 
 void fallingPalette()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++)
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
     leds[i] = ColorFromPalette(gCurrentPalette, zCoords[i] / 4 + beat8(speed));
   }
@@ -1283,7 +1285,7 @@ void pride2()
 
     CRGB newcolor = CHSV( hue8, sat8, bri8);
 
-    for (uint8_t j = 0; j < NUM_LEDS; j++)
+    for (uint16_t j = 0; j < NUM_LEDS; j++)
     {
       if (levels[j] == i) {
         nblend(leds[j], newcolor, 64);
@@ -1294,7 +1296,7 @@ void pride2()
 
 void radialPaletteShift()
 {
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+  for (uint16_t i = 0; i < NUM_LEDS; i++) {
     // leds[i] = ColorFromPalette( gCurrentPalette, gHue + sin8(i*16), brightness);
     leds[i] = ColorFromPalette(gCurrentPalette, i + gHue, 255, LINEARBLEND);
   }
@@ -1475,9 +1477,9 @@ void colorWaves2()
 
     CRGB newcolor = ColorFromPalette( gCurrentPalette, index, bri8);
 
-    for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    for (uint16_t i = 0; i < NUM_LEDS; i++) {
       if (levels[i] == levelIndex) {
-        uint8_t pixelnumber = (NUM_LEDS - 1) - i;
+        uint16_t pixelnumber = (NUM_LEDS - 1) - i;
 
         nblend( leds[pixelnumber], newcolor, 128);
       }

@@ -39,7 +39,7 @@ void whiteMeteors() {
 
   EVERY_N_MILLISECONDS(30) {
     for (uint8_t meteorIndex = 0; meteorIndex < meteorCount; meteorIndex++) {
-      uint8_t i = getMeteorLedIndexAndUpdate(meteorIndex);
+      uint16_t i = getMeteorLedIndexAndUpdate(meteorIndex);
 
       if(i < NUM_LEDS) {
         leds[i] = CRGB(255, 255, 255);
@@ -52,7 +52,7 @@ void paletteMeteors() {
   dimAll(220);
 
   for (uint8_t meteorIndex = 0; meteorIndex < meteorCount; meteorIndex++) {
-    uint8_t i = getMeteorLedIndexAndUpdate(meteorIndex);
+    uint16_t i = getMeteorLedIndexAndUpdate(meteorIndex);
 
     if(i < NUM_LEDS) {
       leds[i] = ColorFromPalette(gCurrentPalette, gHue);
@@ -64,7 +64,7 @@ void rainbowMeteors() {
   dimAll(220);
 
   for (uint8_t meteorIndex = 0; meteorIndex < meteorCount; meteorIndex++) {
-    uint8_t i = getMeteorLedIndexAndUpdate(meteorIndex);
+    uint16_t i = getMeteorLedIndexAndUpdate(meteorIndex);
 
     if(i < NUM_LEDS) {
       leds[i] = CHSV(gHue, 255, 255);
