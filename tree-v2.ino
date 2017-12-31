@@ -1311,7 +1311,7 @@ void heatMap(CRGBPalette16 palette, bool up)
   random16_add_entropy(random(256));
 
   // Array of temperature readings at each simulation cell
-  static byte heat[256];
+  static byte heat[NUM_LEDS];
 
   byte colorindex;
 
@@ -1500,7 +1500,7 @@ void paletteWaves() {
   fadeToBlackBy( leds, NUM_LEDS, 20);
 
   for (uint8_t levelIndex = 0; levelIndex < levelCount; levelIndex++) {
-    for (uint8_t i = levelStart[levelIndex]; i < levelEnd[levelIndex]; i++) {
+    for (uint16_t i = levelStart[levelIndex]; i < levelEnd[levelIndex]; i++) {
       leds[i] = ColorFromPalette(gCurrentPalette, gHue + levelIndex, beatsin8(speed + levelIndex));
     }
   }
