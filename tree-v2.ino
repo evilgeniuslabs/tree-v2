@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_ALLOW_INTERRUPTS 0
 #define FASTLED_INTERRUPT_RETRY_COUNT 0
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
@@ -29,7 +29,7 @@ extern "C" {
 //#include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
-#include <WebSocketsServer.h>
+//#include <WebSocketsServer.h>
 #include <FS.h>
 #include <EEPROM.h>
 // #include <IRremoteESP8266.h>
@@ -56,7 +56,7 @@ const char* ssid = "";
 const char* password = "";
 
 ESP8266WebServer webServer(80);
-WebSocketsServer webSocketsServer = WebSocketsServer(81);
+//WebSocketsServer webSocketsServer = WebSocketsServer(81);
 ESP8266HTTPUpdateServer httpUpdateServer;
 
 #include "FSBrowser.h"
@@ -69,7 +69,7 @@ ESP8266HTTPUpdateServer httpUpdateServer;
 #define NUM_LEDS      300
 
 #define MILLI_AMPS         4000     // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
-#define FRAMES_PER_SECOND  240 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
+#define FRAMES_PER_SECOND  60 // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 #include "Map.h"
 
@@ -199,6 +199,7 @@ PatternAndNameList patterns = {
   { fireTwinkles,           "Fire Twinkles" },
   { cloud2Twinkles,         "Cloud 2 Twinkles" },
   { oceanTwinkles,          "Ocean Twinkles" },
+  { gradientPaletteTwinkles,"Palette Twinkles" },
 
   { candyCane,              "Candy Cane" },
 
@@ -382,6 +383,8 @@ void setup() {
     twinkleSpeed = value.toInt();
     if (twinkleSpeed < 0) twinkleSpeed = 0;
     else if (twinkleSpeed > 8) twinkleSpeed = 8;
+    EEPROM.write(9, twinkleSpeed);
+    EEPROM.commit();
     broadcastInt("twinkleSpeed", twinkleSpeed);
     sendInt(twinkleSpeed);
   });
@@ -391,8 +394,21 @@ void setup() {
     twinkleDensity = value.toInt();
     if (twinkleDensity < 0) twinkleDensity = 0;
     else if (twinkleDensity > 8) twinkleDensity = 8;
+    EEPROM.write(10, twinkleDensity);
+    EEPROM.commit();
     broadcastInt("twinkleDensity", twinkleDensity);
     sendInt(twinkleDensity);
+  });
+
+  webServer.on("/coolLikeIncandescent", HTTP_POST, []() {
+    String value = webServer.arg("value");
+    coolLikeIncandescent = value.toInt();
+    if (coolLikeIncandescent < 0) coolLikeIncandescent = 0;
+    else if (coolLikeIncandescent > 1) coolLikeIncandescent = 1;
+    EEPROM.write(11, coolLikeIncandescent);
+    EEPROM.commit();
+    broadcastInt("coolLikeIncandescent", coolLikeIncandescent);
+    sendInt(coolLikeIncandescent);
   });
 
   webServer.on("/solidColor", HTTP_POST, []() {
@@ -454,8 +470,8 @@ void setup() {
   webServer.begin();
   Serial.println("HTTP web server started");
 
-  webSocketsServer.begin();
-  webSocketsServer.onEvent(webSocketEvent);
+//  webSocketsServer.begin();
+//  webSocketsServer.onEvent(webSocketEvent);
   Serial.println("Web socket server started");
 
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
@@ -474,20 +490,20 @@ void sendString(String value)
 void broadcastInt(String name, uint8_t value)
 {
   String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
-  webSocketsServer.broadcastTXT(json);
+//  webSocketsServer.broadcastTXT(json);
 }
 
 void broadcastString(String name, String value)
 {
   String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
-  webSocketsServer.broadcastTXT(json);
+//  webSocketsServer.broadcastTXT(json);
 }
 
 void loop() {
   // Add entropy to random number generator; we use a lot of it.
   random16_add_entropy(random(65535));
 
-  webSocketsServer.loop();
+//  webSocketsServer.loop();
   webServer.handleClient();
 
   // handleIrInput();
@@ -529,46 +545,48 @@ void loop() {
 
   FastLED.show();
 
+  delay(1000 / FRAMES_PER_SECOND);
+
   // insert a delay to keep the framerate modest
   // FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-
-  switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.printf("[%u] Disconnected!\n", num);
-      break;
-
-    case WStype_CONNECTED:
-      {
-        IPAddress ip = webSocketsServer.remoteIP(num);
-        Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-
-        // send message to client
-        // webSocketsServer.sendTXT(num, "Connected");
-      }
-      break;
-
-    case WStype_TEXT:
-      Serial.printf("[%u] get Text: %s\n", num, payload);
-
-      // send message to client
-      // webSocketsServer.sendTXT(num, "message here");
-
-      // send data to all connected clients
-      // webSocketsServer.broadcastTXT("message here");
-      break;
-
-    case WStype_BIN:
-      Serial.printf("[%u] get binary length: %u\n", num, length);
-      hexdump(payload, length);
-
-      // send message to client
-      // webSocketsServer.sendBIN(num, payload, lenght);
-      break;
-  }
-}
+//void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+//
+//  switch (type) {
+//    case WStype_DISCONNECTED:
+//      Serial.printf("[%u] Disconnected!\n", num);
+//      break;
+//
+//    case WStype_CONNECTED:
+//      {
+//        IPAddress ip = webSocketsServer.remoteIP(num);
+//        Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+//
+//        // send message to client
+//        // webSocketsServer.sendTXT(num, "Connected");
+//      }
+//      break;
+//
+//    case WStype_TEXT:
+//      Serial.printf("[%u] get Text: %s\n", num, payload);
+//
+//      // send message to client
+//      // webSocketsServer.sendTXT(num, "message here");
+//
+//      // send data to all connected clients
+//      // webSocketsServer.broadcastTXT("message here");
+//      break;
+//
+//    case WStype_BIN:
+//      Serial.printf("[%u] get binary length: %u\n", num, length);
+//      hexdump(payload, length);
+//
+//      // send message to client
+//      // webSocketsServer.sendBIN(num, payload, lenght);
+//      break;
+//  }
+//}
 
 //void handleIrInput()
 //{
@@ -803,6 +821,17 @@ void loadSettings()
 
   autoplay = EEPROM.read(6);
   autoplayDuration = EEPROM.read(7);
+
+//  currentPaletteIndex = EEPROM.read(8);
+//  if (currentPaletteIndex < 0)
+//    currentPaletteIndex = 0;
+//  else if (currentPaletteIndex >= paletteCount)
+//    currentPaletteIndex = paletteCount - 1;
+
+  twinkleSpeed = EEPROM.read(9);
+  twinkleDensity = EEPROM.read(10);
+
+  coolLikeIncandescent = EEPROM.read(11);
 }
 
 void setPower(uint8_t value)

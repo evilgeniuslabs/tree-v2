@@ -11,52 +11,51 @@ var postValueTimer = {};
 
 var ignoreColorChange = false;
 
-var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
-ws.debug = true;
+// var ws = new ReconnectingWebSocket('ws://' + address + ':81/', ['arduino']);
+// ws.debug = true;
 
-ws.onmessage = function(evt) {
-  if(evt.data != null)
-  {
-    var data = JSON.parse(evt.data);
-    if(data == null) return;
-    updateFieldValue(data.name, data.value);
-  }
-}
+// ws.onmessage = function(evt) {
+//   if(evt.data != null)
+//   {
+//     var data = JSON.parse(evt.data);
+//     if(data == null) return;
+//     updateFieldValue(data.name, data.value);
+//   }
+// }
 
 $(document).ready(function() {
   $("#status").html("Connecting, please wait...");
 
   $.get(urlBase + "all", function(data) {
-      $("#status").html("Loading, please wait...");
+    $("#status").html("Loading, please wait...");
 
-      $.each(data, function(index, field) {
-        if (field.type == "Number") {
-          addNumberField(field);
-        } else if (field.type == "Boolean") {
-          addBooleanField(field);
-        } else if (field.type == "Select") {
-          addSelectField(field);
-        } else if (field.type == "Color") {
-          addColorFieldPalette(field);
-          addColorFieldPicker(field);
-        } else if (field.type == "Section") {
-          addSectionField(field);
-        }
-      });
-
-      $(".minicolors").minicolors({
-        theme: "bootstrap",
-        changeDelay: 200,
-        control: "wheel",
-        format: "rgb",
-        inline: true
-      });
-
-      $("#status").html("Ready");
-    })
-    .fail(function(errorThrown) {
-      console.log("error: " + errorThrown);
+    $.each(data, function(index, field) {
+      if (field.type == "Number") {
+        addNumberField(field);
+      } else if (field.type == "Boolean") {
+        addBooleanField(field);
+      } else if (field.type == "Select") {
+        addSelectField(field);
+      } else if (field.type == "Color") {
+        addColorFieldPalette(field);
+        addColorFieldPicker(field);
+      } else if (field.type == "Section") {
+        addSectionField(field);
+      }
     });
+
+    $(".minicolors").minicolors({
+      theme: "bootstrap",
+      changeDelay: 200,
+      control: "wheel",
+      format: "rgb",
+      inline: true
+    });
+
+    $("#status").html("Ready");
+  }).fail(function(errorThrown) {
+    console.log("error: " + errorThrown);
+  });
 });
 
 function addNumberField(field) {
@@ -131,10 +130,10 @@ function addBooleanField(field) {
   btnOff.attr("class", !field.value ? "btn btn-primary" : "btn btn-default");
 
   btnOn.click(function() {
-    setBooleanFieldValue(field, btnOn, btnOff, 1)
+    setBooleanFieldValue(field, btnOn, btnOff, 1);
   });
   btnOff.click(function() {
-    setBooleanFieldValue(field, btnOn, btnOff, 0)
+    setBooleanFieldValue(field, btnOn, btnOff, 0);
   });
 
   $("#form").append(template);
@@ -177,8 +176,7 @@ function addSelectField(field) {
     var value = template.find("#" + id + " option:selected").index();
     var count = select.find("option").length;
     value--;
-    if(value < 0)
-      value = count - 1;
+    if (value < 0) value = count - 1;
     select.val(value);
     postValue(field.name, value);
   });
@@ -187,8 +185,7 @@ function addSelectField(field) {
     var value = template.find("#" + id + " option:selected").index();
     var count = select.find("option").length;
     value++;
-    if(value >= count)
-      value = 0;
+    if (value >= count) value = 0;
     select.val(value);
     postValue(field.name, value);
   });
@@ -207,11 +204,9 @@ function addColorFieldPicker(field) {
   var input = template.find(".minicolors");
   input.attr("id", id);
 
-  if(!field.value.startsWith("rgb("))
-    field.value = "rgb(" + field.value;
+  if (!field.value.startsWith("rgb(")) field.value = "rgb(" + field.value;
 
-  if(!field.value.endsWith(")"))
-    field.value += ")";
+  if (!field.value.endsWith(")")) field.value += ")";
 
   input.val(field.value);
 
@@ -338,7 +333,7 @@ function addColorFieldPalette(field) {
 
   buttons.each(function(index, button) {
     $(button).click(function() {
-      var rgb = $(this).css('backgroundColor');
+      var rgb = $(this).css("backgroundColor");
       var components = rgbToComponents(rgb);
 
       field.value = components.r + "," + components.g + "," + components.b;
@@ -383,7 +378,6 @@ function updateFieldValue(name, value) {
 
     btnOn.attr("class", value ? "btn btn-primary" : "btn btn-default");
     btnOff.attr("class", !value ? "btn btn-primary" : "btn btn-default");
-
   } else if (type == "Select") {
     var select = group.find(".form-control");
     select.val(value);
@@ -391,7 +385,7 @@ function updateFieldValue(name, value) {
     var input = group.find(".form-control");
     input.val("rgb(" + value + ")");
   }
-};
+}
 
 function setBooleanFieldValue(field, btnOn, btnOff, value) {
   field.value = value;
@@ -424,14 +418,29 @@ function delayPostValue(name, value) {
 }
 
 function postColor(name, value) {
-  $("#status").html("Setting " + name + ": " + value.r + "," + value.g + "," + value.b + ", please wait...");
+  $("#status").html(
+    "Setting " +
+      name +
+      ": " +
+      value.r +
+      "," +
+      value.g +
+      "," +
+      value.b +
+      ", please wait..."
+  );
 
   var body = { name: name, r: value.r, g: value.g, b: value.b };
 
-  $.post(urlBase + name + "?r=" + value.r + "&g=" + value.g + "&b=" + value.b, body, function(data) {
-    $("#status").html("Set " + name + ": " + data);
-  })
-  .fail(function(textStatus, errorThrown) { $("#status").html("Fail: " + textStatus + " " + errorThrown); });
+  $.post(
+    urlBase + name + "?r=" + value.r + "&g=" + value.g + "&b=" + value.b,
+    body,
+    function(data) {
+      $("#status").html("Set " + name + ": " + data);
+    }
+  ).fail(function(textStatus, errorThrown) {
+    $("#status").html("Fail: " + textStatus + " " + errorThrown);
+  });
 }
 
 function delayPostColor(name, value) {

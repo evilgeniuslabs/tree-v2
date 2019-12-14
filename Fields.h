@@ -72,6 +72,10 @@ String getTwinkleDensity() {
   return String(twinkleDensity);
 }
 
+String getCoolLikeIncandescent() {
+  return String(coolLikeIncandescent);
+}
+
 FieldList fields = {
   { "power", "Power", BooleanFieldType, 0, 1, getPower },
   { "brightness", "Brightness", NumberFieldType, 1, 255, getBrightness },
@@ -88,6 +92,7 @@ FieldList fields = {
   { "twinkles", "Twinkles", SectionFieldType },
   { "twinkleSpeed", "Twinkle Speed", NumberFieldType, 0, 8, getTwinkleSpeed },
   { "twinkleDensity", "Twinkle Density", NumberFieldType, 0, 8, getTwinkleDensity },
+  { "coolLikeIncandescent", "Incandescent Cool", BooleanFieldType, 0, 1, getCoolLikeIncandescent },
 };
 
 uint8_t fieldCount = ARRAY_SIZE(fields);
