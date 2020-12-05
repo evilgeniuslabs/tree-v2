@@ -360,6 +360,8 @@ void setup() {
   webServer.on("/cooling", HTTP_POST, []() {
     String value = webServer.arg("value");
     cooling = value.toInt();
+    EEPROM.write(13, cooling);
+    EEPROM.commit();
     broadcastInt("cooling", cooling);
     sendInt(cooling);
   });
@@ -367,6 +369,8 @@ void setup() {
   webServer.on("/sparking", HTTP_POST, []() {
     String value = webServer.arg("value");
     sparking = value.toInt();
+    EEPROM.write(14, sparking);
+    EEPROM.commit();
     broadcastInt("sparking", sparking);
     sendInt(sparking);
   });
@@ -374,6 +378,8 @@ void setup() {
   webServer.on("/speed", HTTP_POST, []() {
     String value = webServer.arg("value");
     speed = value.toInt();
+    EEPROM.write(12, speed);
+    EEPROM.commit();
     broadcastInt("speed", speed);
     sendInt(speed);
   });
@@ -832,6 +838,10 @@ void loadSettings()
   twinkleDensity = EEPROM.read(10);
 
   coolLikeIncandescent = EEPROM.read(11);
+
+  speed = EEPROM.read(12);
+  cooling = EEPROM.read(13);
+  sparking = eeprom.read(14);
 }
 
 void setPower(uint8_t value)
