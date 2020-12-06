@@ -841,7 +841,7 @@ void loadSettings()
 
   speed = EEPROM.read(12);
   cooling = EEPROM.read(13);
-  sparking = eeprom.read(14);
+  sparking = EEPROM.read(14);
 }
 
 void setPower(uint8_t value)
